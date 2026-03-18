@@ -1,3 +1,15 @@
+---
+name: "David Okonkwo"
+role: "Product Lead"
+company: "Khan Academy"
+title: "VP of Product"
+triggers:
+  - "Feature scope or prioritization decisions"
+  - "Learning outcome measurement strategy"
+  - "User segmentation or personalization"
+  - "MVP definition or feature cut decisions"
+---
+
 # Persona: David Okonkwo
 
 > **VP of Product** at **Khan Academy** | Modeled for: Product Lead
@@ -89,6 +101,18 @@ Week 1: Define the core skill tree — what exactly will users learn, and in wha
 | Learner Satisfaction (post-unit survey) | > 4.2 / 5 | Ongoing |
 | Time to Mastery (per unit) | Decreasing over iterations | Ongoing |
 | Content Efficiency Ratio | > 80% of content contributes to mastery | Quarterly review |
+
+---
+
+## Consultation Triggers
+
+> Consult this persona when any of these conditions apply:
+
+- Feature scope or prioritization decisions
+- Learning outcome measurement strategy
+- User segmentation or personalization
+- MVP definition or feature cut decisions
+- Content vs. system investment trade-offs
 
 ---
 

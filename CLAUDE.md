@@ -31,10 +31,13 @@ When a user asks you to start a new project, you follow the runbook in `PROJECT_
 
 | File | Purpose |
 |------|---------|
-| `PROJECT_SETUP_PROCESS.md` | The runbook — follow this step by step (Phases 0-5) |
-| `PERSONA_BUILDER_GUIDE.md` | Deep reference on how to create and use personas |
+| `PROJECT_SETUP_PROCESS.md` | The runbook — index linking to per-phase skill files |
+| `skills/` | Per-phase skill files (SKILL.md) for agent-executable phases |
+| `skills/write-a-persona/` | Meta-skill for creating persona profiles with quality constraints |
+| `PERSONA_BUILDER_GUIDE.md` | Quick-start guide on creating and using personas |
 | `CONSENSUS_PROTOCOL.md` | How personas resolve disagreements (2/3 majority + CEO tiebreaker) |
-| `templates/persona_template.md` | Blank persona profile template |
+| `docs/reference/` | Detailed reference docs: creating, consulting, and quality-checking personas |
+| `templates/persona_template.md` | Blank persona profile template (with YAML frontmatter) |
 | `templates/persona_check.md` | Pre-flight checklist before leaving persona phase |
 | `examples/` | Example teams: learning app, SaaS analytics, marketplace |
 

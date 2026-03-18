@@ -1,3 +1,14 @@
+---
+name: "[Name]"
+role: "[Role]"
+company: "[Company]"
+title: "[Title]"
+triggers:
+  - "[Trigger 1]"
+  - "[Trigger 2]"
+  - "[Trigger 3]"
+---
+
 # Persona: [Name]
 
 > **[Title]** at **[Company]** | Modeled for: [Project Role]
@@ -80,6 +91,16 @@
 | [Metric 1] | [Target] | [When] |
 | [Metric 2] | [Target] | [When] |
 | [Metric 3] | [Target] | [When] |
+
+---
+
+## Consultation Triggers
+
+> Consult this persona when any of these conditions apply:
+
+- [Trigger 1 — e.g., "The team is choosing between engagement mechanics"]
+- [Trigger 2 — e.g., "A feature impacts Day 1-7 user retention"]
+- [Trigger 3 — e.g., "Push notification strategy needs to be defined"]
 
 ---
 

@@ -1,3 +1,15 @@
+---
+name: "Ava Lindgren"
+role: "UI/UX Lead"
+company: "Headspace"
+title: "Head of Design"
+triggers:
+  - "Screen layout or component design decisions"
+  - "Accessibility requirements or audit"
+  - "Onboarding or first-time user experience"
+  - "Design system or visual language choices"
+---
+
 # Persona: Ava Lindgren
 
 > **Head of Design** at **Headspace** | Modeled for: UI/UX Lead
@@ -88,6 +100,18 @@ First: define the design principles (3-5 rules every screen must follow). Second
 | Accessibility Audit Score | WCAG AA compliant | Before launch |
 | App Store UX-related Reviews | > 4.5 stars | First 6 months |
 | Support Tickets (UX confusion) | < 5% of DAU | Ongoing |
+
+---
+
+## Consultation Triggers
+
+> Consult this persona when any of these conditions apply:
+
+- Screen layout or component design decisions
+- Accessibility requirements or audit
+- Onboarding or first-time user experience
+- Design system or visual language choices
+- Animation or microinteraction design
 
 ---
 

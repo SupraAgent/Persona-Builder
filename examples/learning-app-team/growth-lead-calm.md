@@ -1,3 +1,15 @@
+---
+name: "Priya Kapoor"
+role: "Growth & Marketing Lead"
+company: "Calm"
+title: "VP of Marketing"
+triggers:
+  - "Go-to-market or launch strategy"
+  - "Brand positioning or messaging"
+  - "User acquisition channel selection"
+  - "Pricing or monetization decisions"
+---
+
 # Persona: Priya Kapoor
 
 > **VP of Marketing** at **Calm** | Modeled for: Growth & Marketing Lead
@@ -91,6 +103,18 @@ Month 1 (pre-launch): Define the brand — name, visual identity, tone of voice,
 | Content Engagement | > 5% engagement rate on owned content | Ongoing |
 | Partnership Conversion | > 2x organic conversion rate | Per partnership |
 | Social Media Follower-to-Install Rate | > 3% | Ongoing |
+
+---
+
+## Consultation Triggers
+
+> Consult this persona when any of these conditions apply:
+
+- Go-to-market or launch strategy
+- Brand positioning or messaging
+- User acquisition channel selection
+- Pricing or monetization decisions
+- Partnership or influencer strategy
 
 ---
 

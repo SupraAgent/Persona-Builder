@@ -1,3 +1,15 @@
+---
+name: "Marcus Rivera"
+role: "Retention & Engagement Lead"
+company: "Duolingo"
+title: "Chief Retention Officer"
+triggers:
+  - "Feature impacts daily engagement or retention"
+  - "Notification or reminder strategy needs to be defined"
+  - "Gamification mechanic design (streaks, leagues, rewards)"
+  - "Onboarding flow decisions"
+---
+
 # Persona: Marcus Rivera
 
 > **Chief Retention Officer** at **Duolingo** | Modeled for: Retention & Engagement Lead
@@ -88,6 +100,18 @@ Week 1: Define the core learning loop — one complete session that demonstrates
 | Avg. Session Length | > 4 minutes | Ongoing |
 | Streak Adoption Rate | > 40% of DAU | First 3 months |
 | Push Notification Opt-in | > 50% | Ongoing |
+
+---
+
+## Consultation Triggers
+
+> Consult this persona when any of these conditions apply:
+
+- Feature impacts daily engagement or retention
+- Notification or reminder strategy needs to be defined
+- Gamification mechanic design (streaks, leagues, rewards)
+- Onboarding flow decisions
+- User segmentation by engagement level
 
 ---
 
