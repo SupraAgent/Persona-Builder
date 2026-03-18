@@ -1,10 +1,18 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Combobox } from "@/components/ui/combobox";
 import { PROJECT_TYPES, type LaunchKitDraft, type TeamRole } from "@/lib/launch-kit";
 import { ROLE_SUGGESTIONS, COMPANY_SUGGESTIONS, FOCUS_SUGGESTIONS } from "@/lib/suggestions";
+
+type SavedPersona = {
+  id: string;
+  name: string;
+  role: string;
+  icon: string | null;
+};
 
 type Props = {
   draft: LaunchKitDraft;
@@ -12,11 +20,22 @@ type Props = {
 };
 
 export function StepTeam({ draft, onChange }: Props) {
+  const [savedPersonas, setSavedPersonas] = React.useState<SavedPersona[]>([]);
+  const [showPicker, setShowPicker] = React.useState(false);
+
   const suggestedRoles = React.useMemo(() => {
     if (!draft.projectType) return [];
     const pt = PROJECT_TYPES.find((p) => p.id === draft.projectType);
     return pt?.suggestedRoles ?? [];
   }, [draft.projectType]);
+
+  // Load saved personas
+  React.useEffect(() => {
+    fetch("/api/personas")
+      .then((r) => r.json())
+      .then((data) => setSavedPersonas(data.personas ?? []))
+      .catch(() => {});
+  }, []);
 
   // Auto-populate from suggestions when team is empty and project type is set
   React.useEffect(() => {
@@ -44,6 +63,15 @@ export function StepTeam({ draft, onChange }: Props) {
 
   function removeRole(index: number) {
     onChange({ team: draft.team.filter((_, i) => i !== index) });
+  }
+
+  function addFromPersona(persona: SavedPersona) {
+    const roleName = persona.name;
+    const company = persona.role?.includes(" at ") ? persona.role.split(" at ")[1] : "";
+    onChange({
+      team: [...draft.team, { role: roleName, company, focus: persona.role }],
+    });
+    setShowPicker(false);
   }
 
   return (
@@ -132,9 +160,51 @@ export function StepTeam({ draft, onChange }: Props) {
         ))}
       </div>
 
-      <Button type="button" variant="ghost" size="sm" onClick={addRole}>
-        + Add role
-      </Button>
+      <div className="flex items-center gap-3">
+        <Button type="button" variant="ghost" size="sm" onClick={addRole}>
+          + Add role
+        </Button>
+
+        {savedPersonas.length > 0 && (
+          <div className="relative">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowPicker(!showPicker)}
+            >
+              + From saved personas
+            </Button>
+            {showPicker && (
+              <div className="absolute z-50 mt-1 w-72 max-h-[240px] overflow-y-auto rounded-xl border border-white/10 bg-card shadow-lg">
+                {savedPersonas.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => addFromPersona(p)}
+                    className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-white/5 cursor-pointer flex items-center gap-2"
+                  >
+                    <span className="text-base">{p.icon || "🤖"}</span>
+                    <div>
+                      <div className="font-medium">{p.name}</div>
+                      {p.role && (
+                        <div className="text-xs text-muted-foreground">{p.role}</div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        <Link
+          href="/expert"
+          className="text-xs text-primary hover:text-primary/80 transition"
+        >
+          Create detailed persona
+        </Link>
+      </div>
 
       <p className="text-xs text-muted-foreground">
         {draft.team.length} role{draft.team.length !== 1 ? "s" : ""} defined

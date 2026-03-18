@@ -2,6 +2,8 @@
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Combobox } from "@/components/ui/combobox";
+import { TITLE_SUGGESTIONS, COMPANY_SUGGESTIONS } from "@/lib/suggestions";
 import type { PersonaDraft } from "@/lib/persona-builder";
 
 type Props = {
@@ -34,18 +36,20 @@ export function StepRole({ draft, onChange }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">Title</label>
-            <Input
+            <Combobox
               value={draft.title}
-              onChange={(e) => onChange({ title: e.target.value })}
-              placeholder="e.g. VP of Design"
+              onChange={(v) => onChange({ title: v })}
+              suggestions={TITLE_SUGGESTIONS}
+              placeholder="Search titles or type custom..."
             />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-foreground">Company</label>
-            <Input
+            <Combobox
               value={draft.company}
-              onChange={(e) => onChange({ company: e.target.value })}
-              placeholder="e.g. Duolingo"
+              onChange={(v) => onChange({ company: v })}
+              suggestions={COMPANY_SUGGESTIONS}
+              placeholder="Search companies..."
             />
           </div>
         </div>

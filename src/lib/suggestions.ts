@@ -1,5 +1,29 @@
 /** Pre-built suggestion lists for searchable combobox fields */
 
+export const TITLE_SUGGESTIONS = [
+  // C-Suite
+  "CEO", "CTO", "CPO", "CMO", "CFO", "COO", "CRO", "CDO", "CISO",
+  // VP
+  "VP of Engineering", "VP of Product", "VP of Design", "VP of Marketing", "VP of Growth",
+  "VP of Sales", "VP of Customer Success", "VP of Data", "VP of Operations",
+  // Director
+  "Director of Engineering", "Director of Product", "Director of Design", "Director of Marketing",
+  "Director of Growth", "Director of Analytics", "Director of DevRel",
+  // Head of
+  "Head of Design", "Head of Engineering", "Head of Product", "Head of Growth",
+  "Head of Content", "Head of Community", "Head of Security", "Head of Data",
+  // Lead
+  "Engineering Lead", "Product Lead", "Design Lead", "Growth Lead", "QA Lead",
+  "DevOps Lead", "Frontend Lead", "Backend Lead", "Mobile Lead", "Data Lead",
+  // Senior IC
+  "Staff Engineer", "Principal Engineer", "Senior Product Manager", "Senior Designer",
+  "Senior Data Scientist", "Senior Security Engineer",
+  // Specialist
+  "Product Manager", "Product Designer", "UX Researcher", "Data Scientist",
+  "Solutions Architect", "Developer Advocate", "Technical Writer",
+  "Blockchain Engineer", "Smart Contract Auditor", "Protocol Engineer",
+];
+
 export const COMPANY_SUGGESTIONS = [
   // Tech giants
   "Apple", "Google", "Microsoft", "Amazon", "Meta", "Netflix", "Spotify", "Uber", "Airbnb", "Tesla",

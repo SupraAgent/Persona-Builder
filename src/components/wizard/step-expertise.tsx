@@ -1,8 +1,35 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { TagInput } from "@/components/ui/tag-input";
+import { Combobox } from "@/components/ui/combobox";
+import { ComboboxTags } from "@/components/ui/combobox";
+import { FOCUS_SUGGESTIONS } from "@/lib/suggestions";
 import type { PersonaDraft } from "@/lib/persona-builder";
+
+const SKILL_SUGGESTIONS = [
+  "Product strategy", "User research", "Data analysis", "A/B testing", "Growth hacking",
+  "Content marketing", "SEO", "Paid acquisition", "Retention optimization", "Funnel analysis",
+  "System design", "API design", "Database design", "Security", "Performance optimization",
+  "CI/CD", "DevOps", "Cloud infrastructure", "Mobile development", "Frontend architecture",
+  "UI design", "UX design", "Design systems", "Prototyping", "User testing",
+  "Gamification", "Behavioral psychology", "Notification strategy", "Onboarding design",
+  "Machine learning", "NLP", "Computer vision", "Data pipelines", "Analytics",
+  "Smart contracts", "Token economics", "DeFi protocols", "Cross-chain", "Move/Solidity",
+  "Technical writing", "Developer relations", "Community building", "Public speaking",
+];
+
+const TOOL_SUGGESTIONS = [
+  "React", "Next.js", "TypeScript", "Node.js", "Python", "Go", "Rust", "Swift", "Kotlin",
+  "PostgreSQL", "Redis", "MongoDB", "Supabase", "Firebase", "AWS", "GCP", "Vercel",
+  "Figma", "Sketch", "Adobe XD", "Framer", "Storybook",
+  "GitHub", "Linear", "Notion", "Slack", "Jira", "Confluence",
+  "Mixpanel", "Amplitude", "PostHog", "Google Analytics", "Hotjar", "FullStory",
+  "Stripe", "Twilio", "SendGrid", "Auth0", "Clerk",
+  "Docker", "Kubernetes", "Terraform", "GitHub Actions", "CircleCI",
+  "Jest", "Playwright", "Cypress", "Vitest",
+  "TensorFlow", "PyTorch", "LangChain", "OpenAI API", "Anthropic API",
+  "Hardhat", "Foundry", "Move CLI", "Aptos SDK",
+];
 
 type Props = {
   draft: PersonaDraft;
@@ -22,19 +49,21 @@ export function StepExpertise({ draft, onChange }: Props) {
       <div className="space-y-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Primary Domain</label>
-          <Input
+          <Combobox
             value={draft.primaryDomain}
-            onChange={(e) => onChange({ primaryDomain: e.target.value })}
-            placeholder="e.g. Gamification & behavioral design for learning"
+            onChange={(v) => onChange({ primaryDomain: v })}
+            suggestions={FOCUS_SUGGESTIONS}
+            placeholder="Search domains or type custom..."
           />
         </div>
 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Secondary Skills</label>
-          <TagInput
+          <ComboboxTags
             value={draft.secondarySkills}
             onChange={(secondarySkills) => onChange({ secondarySkills })}
-            placeholder="Type a skill and press Enter"
+            suggestions={SKILL_SUGGESTIONS}
+            placeholder="Search skills or type and press Enter"
           />
         </div>
 
@@ -49,10 +78,11 @@ export function StepExpertise({ draft, onChange }: Props) {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-foreground">Tools & Frameworks</label>
-          <TagInput
+          <ComboboxTags
             value={draft.toolsAndFrameworks}
             onChange={(toolsAndFrameworks) => onChange({ toolsAndFrameworks })}
-            placeholder="Type a tool/framework and press Enter"
+            suggestions={TOOL_SUGGESTIONS}
+            placeholder="Search tools or type and press Enter"
           />
         </div>
       </div>
