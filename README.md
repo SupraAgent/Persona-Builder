@@ -16,28 +16,45 @@ Instead of asking *"how should we design onboarding?"*, you ask *"how would Duol
 2. **Assemble a persona team** using the [Persona Builder Guide](./PERSONA_BUILDER_GUIDE.md)
 3. **Consult personas** at every major decision point during development
 
+## Using with an AI Agent
+
+Point your agent at this repo and it will auto-read `CLAUDE.md`, which directs it to follow the runbook in `PROJECT_SETUP_PROCESS.md`. The process uses three markers:
+
+- `[ASK]` — the agent stops and asks you a question before proceeding
+- `[AGENT]` — the agent handles this autonomously
+- `>>> GATE` — hard checkpoint between phases; the agent must get your approval to continue
+
+The agent will **always create personas before writing any code**. If personas don't exist yet, it will walk you through building them — suggesting companies to model after based on your project's comparable products.
+
 ## Repo Structure
 
 ```
 .
-├── README.md                      # You are here
-├── PROJECT_SETUP_PROCESS.md       # Step-by-step project bootstrapping guide
-├── PERSONA_BUILDER_GUIDE.md       # How to create and use personas
+├── CLAUDE.md                      # Agent entry point (read automatically)
+├── PROJECT_SETUP_PROCESS.md       # Agent-executable runbook with gates
+├── PERSONA_BUILDER_GUIDE.md       # Deep reference on persona creation
 ├── templates/
-│   └── persona_template.md        # Blank persona profile template
+│   ├── persona_template.md        # Blank persona profile template
+│   └── persona_check.md           # Pre-flight checklist for persona phase
 └── examples/
-    └── learning-app-team/         # Example: iOS learning app team
-        ├── team.md                # Team manifest and consultation guide
-        ├── retention-lead-duolingo.md   # Example persona: CRO @ Duolingo
-        └── ux-lead-headspace.md         # Example persona: Head of Design @ Headspace
+    └── learning-app-team/         # Complete example: iOS learning app
+        ├── team.md                # Team manifest with all 5 personas
+        ├── retention-lead-duolingo.md
+        ├── ux-lead-headspace.md
+        ├── product-lead-khan-academy.md
+        ├── growth-lead-calm.md
+        └── tech-architect-anki.md
 ```
 
 ## Quick Start
 
+**For agents:** Point the agent to this repo. It reads `CLAUDE.md` automatically and follows the runbook.
+
+**For humans:**
 1. Read [PROJECT_SETUP_PROCESS.md](./PROJECT_SETUP_PROCESS.md) for the full project kickoff flow.
 2. Copy `templates/persona_template.md` to create each persona.
 3. Use personas from [supravibe.xyz](https://supravibe.xyz) templates or build new ones.
-4. See `examples/learning-app-team/` for a complete team example.
+4. See `examples/learning-app-team/` for a complete 5-persona team example.
 
 ## Integration with SupraVibe
 
