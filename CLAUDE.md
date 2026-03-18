@@ -23,24 +23,31 @@ When a user asks you to start a new project, you follow the runbook in `PROJECT_
 
 6. **Consult personas at every major decision.** Once the team is assembled, reference the relevant persona at design, architecture, feature, and growth decisions. Use the consultation prompt from their persona profile.
 
+7. **Follow the Consensus Protocol when personas disagree.** When consulting multiple personas and they give conflicting advice, follow `CONSENSUS_PROTOCOL.md`. Key rule: ≥67% agreement = proceed; deadlock = CEO tiebreaker; user always has final override.
+
+8. **Continue through Post-Launch (Phase 5).** The process doesn't end at launch. Phase 5 runs weekly persona retros, tracks success metrics, and evolves the team as the product matures.
+
 ## Key Files
 
 | File | Purpose |
 |------|---------|
-| `PROJECT_SETUP_PROCESS.md` | The runbook — follow this step by step |
+| `PROJECT_SETUP_PROCESS.md` | The runbook — follow this step by step (Phases 0-5) |
 | `PERSONA_BUILDER_GUIDE.md` | Deep reference on how to create and use personas |
+| `CONSENSUS_PROTOCOL.md` | How personas resolve disagreements (2/3 majority + CEO tiebreaker) |
 | `templates/persona_template.md` | Blank persona profile template |
 | `templates/persona_check.md` | Pre-flight checklist before leaving persona phase |
-| `examples/` | Example personas and team manifests |
+| `examples/` | Example teams: learning app, SaaS analytics, marketplace |
 
 ## Quick Start
 
 When a user says "I want to start a new project":
 
 ```
-1. Read PROJECT_SETUP_PROCESS.md
+1. Read PROJECT_SETUP_PROCESS.md and CONSENSUS_PROTOCOL.md
 2. Start at Phase 0 (Project Brief) — ASK the user what they're building
 3. Move through each phase, stopping at every GATE
-4. NEVER proceed past Phase 2 (Personas) without a complete team.md
+4. NEVER proceed past Phase 1 (Personas) without a complete team.md
 5. At every development decision, consult the relevant persona
+6. When personas disagree, follow the Consensus Protocol (≥67% or CEO tiebreaker)
+7. After launch, continue to Phase 5 — weekly retros, metric tracking, team evolution
 ```
