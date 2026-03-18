@@ -1,5 +1,5 @@
-import { WizardShell } from "@/components/wizard/wizard-shell";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return <WizardShell />;
+  redirect("/expert");
 }
