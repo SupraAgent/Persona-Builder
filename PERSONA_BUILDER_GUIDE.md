@@ -37,6 +37,15 @@ If you already have persona templates built on your **SupraVibe dashboard**:
 
 This is the fastest path when you've already built personas for similar projects.
 
+> **Future integration (planned):** SupraVibe will expose a persona API that agents can call directly:
+> ```
+> GET  /api/personas?role=retention-lead     → list available templates for a role
+> GET  /api/personas/:id                     → fetch a full persona profile
+> POST /api/personas/:id/fork               → clone and customize a template
+> POST /api/personas                        → save a new persona back to SupraVibe
+> ```
+> This will allow agents to search, pull, fork, and push personas without manual copy-paste. The agent would query SupraVibe during Step 1.2 of the project setup process, present matching templates to the user, and pull approved ones directly into `docs/personas/`. Until the API exists, the manual export workflow above is the path.
+
 ---
 
 ## Option B: Create New Personas from Scratch
@@ -184,12 +193,22 @@ QUESTION: As [Persona Name], [Title] at [Company], how would you approach this?
 | Choosing a library or architecture pattern | Technical Architect |
 | Handling edge cases or error states | QA Lead |
 
+### Resolving Persona Conflicts
+
+When consulting multiple personas and they disagree, follow the [Consensus Protocol](./CONSENSUS_PROTOCOL.md):
+
+1. Each persona states their Position, Confidence, Risk if ignored, and Compromise they'd accept
+2. ≥67% weighted agreement = consensus reached, proceed
+3. Deadlock = CEO Tiebreaker evaluates on user impact, speed to learning, reversibility, risk, alignment
+4. User always has final override
+
 ### Updating Personas
 
-Personas should evolve as the project evolves:
+Personas should evolve as the project evolves (see Phase 5 in `PROJECT_SETUP_PROCESS.md`):
 - After major pivots, revisit whether the current team is still the right fit.
 - If a persona's guidance consistently doesn't apply, swap them for a better model.
 - Add new personas as the project enters new phases (e.g., add a "Launch Manager" persona pre-launch).
+- Track decisions in `docs/decisions/` and audit revisit triggers during weekly retros.
 
 ---
 

@@ -55,7 +55,15 @@ These personas will sometimes disagree. That's by design.
 - **Ava (UX) vs. Tomás (Tech):** Ava will want rich animations and fluid transitions. Tomás will flag performance on low-end devices. Test on the target device first — if it stutters, simplify.
 - **Priya (Growth) vs. Tomás (Tech):** Priya will want analytics tracking, A/B test infrastructure, and attribution. Tomás will push back on tracking bloat that impacts performance. Agree on a minimal tracking SDK upfront.
 
-When personas conflict, prioritize based on project phase:
+### Consensus Protocol
+
+When personas conflict, follow the [Consensus Protocol](../../CONSENSUS_PROTOCOL.md):
+- **≥ 67% agreement** = consensus reached, proceed with majority
+- **Deadlock** = invoke CEO Tiebreaker (evaluates on user impact, speed to learning, reversibility, risk, alignment)
+- **Phase authority** gives the current lead a 1.5x bonus on close calls
+
+### Phase Priority
+
 1. **Pre-MVP:** Product Lead + Tech Architect have the loudest voice
 2. **MVP to Launch:** UI/UX Lead + Retention Lead take priority
 3. **Post-Launch:** Growth Lead + Retention Lead drive decisions

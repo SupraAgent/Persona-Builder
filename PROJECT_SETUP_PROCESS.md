@@ -251,7 +251,30 @@ Write a `CLAUDE.md` in the new project root (not the Persona Builder repo) with:
 
 ### Step 3.3 — Build with Persona Consultation `[AGENT]`
 
-As you build each feature, consult the relevant persona at decision points:
+As you build each feature, consult the relevant persona at **specific checkpoints** — not after the fact, but before committing to an approach.
+
+#### Consultation Cadence
+
+Persona consultation happens at three levels:
+
+**Level 1: Feature Planning (before starting a feature)**
+Consult the Product Lead + any domain-relevant persona. This is the "what and why" check.
+- What's the minimum version that proves the hypothesis?
+- What does the 10-star version look like? (Then scope back from there.)
+- What would [relevant persona] push back on?
+
+**Level 2: Implementation Review (before each PR / major commit)**
+Consult the relevant domain persona. This is the "how" check.
+- Does the UI match [UX Lead]'s principles? (Minimal cognitive load, accessibility, etc.)
+- Does the architecture satisfy [Tech Architect]'s constraints? (Offline-first, performance, etc.)
+- Does the engagement model align with [Retention Lead]'s framework? (Hook, habit, loop)
+
+**Level 3: Integration Check (after completing a feature, before moving to the next)**
+Consult 2-3 personas together using the [Consensus Protocol](./CONSENSUS_PROTOCOL.md).
+- Does this feature hold up when multiple persona perspectives evaluate it simultaneously?
+- Are there conflicts between what different personas would want? Resolve them now.
+
+#### Decision-to-Persona Mapping
 
 | Decision Type | Persona to Consult | When |
 |--------------|-------------------|------|
@@ -260,12 +283,14 @@ As you build each feature, consult the relevant persona at decision points:
 | Onboarding, notifications, streaks | Retention Lead | When building engagement features |
 | Database schema, API design, caching | Technical Architect | Before technical decisions |
 | Copy, positioning, CTAs | Growth Lead | When writing user-facing text |
+| Multi-domain decisions (e.g., gamified UI) | 2+ personas | Use Consensus Protocol |
 
 **How to consult:** Use the consultation prompt from the persona's profile file. Frame the specific decision, include context and constraints, and apply their recommendation.
 
 > **After each major feature, tell the user:**
 > "I've built [feature]. Here's what [Persona Name] influenced:
 > - [Key decision and why the persona's perspective shaped it]
+> - [Any conflicts resolved via consensus protocol, if applicable]
 >
 > Here's what it looks like: [screenshot/description]. Any changes?"
 
@@ -334,6 +359,93 @@ Run a final consultation with each persona:
     ASK: "Everything checks out. Ready to launch?"
     CANNOT SKIP: This gate.
 ```
+
+---
+
+## Phase 5: Post-Launch Iteration
+
+> Goal: Monitor real-world performance against persona-defined success metrics, iterate, and evolve the team.
+> This phase begins immediately after launch and runs continuously.
+
+### Step 5.1 — Activate Success Metrics `[AGENT]`
+
+For each persona, pull their success metrics from their profile and create a tracking dashboard or checklist:
+
+```markdown
+## Post-Launch Scorecard
+
+| Persona | Key Metric | Target | Actual | Status |
+|---------|-----------|--------|--------|--------|
+| [Retention Lead] | D7 retention | >30% | — | Pending data |
+| [UX Lead] | Task completion rate | >90% | — | Pending data |
+| [Product Lead] | Skill mastery rate | >70% | — | Pending data |
+| [Growth Lead] | Organic download % | >60% | — | Pending data |
+| [Tech Architect] | P95 latency | <100ms | — | Pending data |
+```
+
+Save as `docs/post-launch-scorecard.md` in the project repo.
+
+### Step 5.2 — Weekly Persona Retro `[AGENT]` + `[ASK]`
+
+At each weekly review cycle, run a brief consultation with each persona:
+
+> For each persona, ask:
+> "As [Name], [Title] at [Company] — looking at this week's data, what's working, what's broken, and what should we prioritize next?"
+>
+> Compile into a weekly retro document and present to the user:
+>
+> **Ask the user:**
+> "Here's this week's persona retro:
+> - [Retention Lead]: [Key observation + recommendation]
+> - [UX Lead]: [Key observation + recommendation]
+> - [Product Lead]: [Key observation + recommendation]
+> - [Growth Lead]: [Key observation + recommendation]
+> - [Tech Architect]: [Key observation + recommendation]
+>
+> Which of these should we act on this week?"
+
+### Step 5.3 — Persona Team Evolution `[ASK]`
+
+As the product matures, the team may need to change:
+
+> **Trigger conditions for persona swap/addition:**
+> - A persona's success metrics are consistently met → their voice can quiet down
+> - A new challenge emerges (e.g., international expansion) → add a new persona
+> - A persona's advice is consistently overridden → re-evaluate if they're the right model
+> - The product pivots → re-run Phase 1 with the new direction
+
+> **Ask the user:**
+> "Based on [trigger], I recommend [adding/swapping/retiring] the [Role] persona. Here's why: [reason]. Should I proceed?"
+
+### Step 5.4 — Decision Audit `[AGENT]`
+
+Review the decision log from `docs/decisions/` (created during consensus resolutions). For each decision with a `revisit trigger`:
+
+1. Check if the trigger condition has been met
+2. If yes, flag it and recommend whether to reverse, modify, or reaffirm
+3. Present findings to the user
+
+```
+>>> GATE: Phase 5 is ongoing — no terminal gate.
+    RHYTHM: Run Steps 5.2-5.4 weekly (or at whatever cadence the user prefers).
+    ASK: "How often do you want persona retros? Weekly, bi-weekly, or after each sprint?"
+    NOTE: Phase 5 loops indefinitely. The product is never "done" — and neither is the team.
+```
+
+---
+
+## Reference: Consensus Protocol
+
+When multiple personas are consulted and disagree, follow the **Consensus & Dispute Resolution Protocol** in [CONSENSUS_PROTOCOL.md](./CONSENSUS_PROTOCOL.md).
+
+**Quick rules:**
+- **≥ 67% agreement** (2/3 majority) = consensus reached, proceed
+- **Deadlock** = invoke CEO Tiebreaker (weighted evaluation on user impact, speed to learning, reversibility, risk, team alignment)
+- **Persona confidence** weights their vote (High=1.0x, Medium=0.7x, Low=0.4x)
+- **Phase authority** gives the current phase lead a 1.5x bonus on close calls
+- **User always has final override** — the protocol reduces decisions reaching the user, not eliminates user control
+
+See the full protocol for the evaluation framework, decision logging, and resolution flow.
 
 ---
 
