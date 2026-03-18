@@ -11,9 +11,10 @@ type Props = {
 };
 
 export function StepRoadmap({ draft, onChange }: Props) {
-  // Auto-populate Foundation phase from MVP features if it has none
+  // Auto-populate Foundation phase from MVP features if not plan-generated
   React.useEffect(() => {
     if (
+      !draft.planGenerated &&
       draft.mvpFeatures.length > 0 &&
       draft.buildPhases[0]?.features.length === 0
     ) {
@@ -39,12 +40,17 @@ export function StepRoadmap({ draft, onChange }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Build Roadmap</h2>
+        <h2 className="text-lg font-semibold text-foreground">MVP Roadmap</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Plan the build order across 4 phases. Features from your MVP list are
-          auto-populated into Foundation.
+          Plan your initial build phases. Focus on what ships for MVP.
         </p>
       </div>
+
+      {draft.planGenerated && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+          Auto-generated from your brief and team. Edit as needed.
+        </div>
+      )}
 
       <div className="space-y-5">
         {draft.buildPhases.map((phase, i) => (

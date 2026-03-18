@@ -224,6 +224,44 @@ export function StepReview({ draft }: Props) {
         </div>
       )}
 
+      {/* North Star */}
+      {draft.northStar && (
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
+          <h3 className="text-sm font-medium text-foreground">North Star</h3>
+          <p className="text-sm text-muted-foreground">{draft.northStar}</p>
+        </div>
+      )}
+
+      {/* Whitepaper */}
+      {draft.whitepaper && (
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-foreground">Whitepaper</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const blob = new Blob([draft.whitepaper], { type: "text/markdown" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `${slugify(draft.projectName)}-whitepaper.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Download .md
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground line-clamp-4">
+            {draft.whitepaper.slice(0, 300)}...
+          </p>
+          <p className="text-[10px] text-muted-foreground/60">
+            {draft.whitepaper.split("\n").length} lines
+          </p>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
         <Button onClick={exportAll} variant="secondary">

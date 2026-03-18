@@ -7,6 +7,7 @@ import { StepBrief } from "./step-brief";
 import { StepTeam } from "./step-team";
 import { StepStack } from "./step-stack";
 import { StepRoadmap } from "./step-roadmap";
+import { StepWhitepaper } from "./step-whitepaper";
 import { StepReview } from "./step-review";
 import { EMPTY_LAUNCH_KIT, type LaunchKitDraft } from "@/lib/launch-kit";
 
@@ -15,6 +16,7 @@ const STEPS = [
   { label: "Team" },
   { label: "Stack" },
   { label: "Roadmap" },
+  { label: "Whitepaper" },
   { label: "Review" },
 ];
 
@@ -55,6 +57,8 @@ export function LaunchShell() {
           ? draft.techChoices.length > 0
           : true;
 
+  const lastStep = STEPS.length - 1;
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       {/* Header */}
@@ -81,7 +85,7 @@ export function LaunchShell() {
       </div>
 
       {/* Progress */}
-      <div className="mb-8 flex items-center gap-2">
+      <div className="mb-8 flex items-center gap-1.5">
         {STEPS.map((s, i) => (
           <React.Fragment key={i}>
             <button
@@ -89,7 +93,7 @@ export function LaunchShell() {
                 setDirection(i > step ? 1 : -1);
                 setStep(i);
               }}
-              className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition cursor-pointer ${
                 i === step
                   ? "bg-primary/10 text-primary border border-primary/30"
                   : i < step
@@ -132,12 +136,13 @@ export function LaunchShell() {
           {step === 1 && <StepTeam draft={draft} onChange={patchDraft} />}
           {step === 2 && <StepStack draft={draft} onChange={patchDraft} />}
           {step === 3 && <StepRoadmap draft={draft} onChange={patchDraft} />}
-          {step === 4 && <StepReview draft={draft} />}
+          {step === 4 && <StepWhitepaper draft={draft} onChange={patchDraft} />}
+          {step === 5 && <StepReview draft={draft} />}
         </motion.div>
       </AnimatePresence>
 
       {/* Navigation */}
-      {step < 4 && (
+      {step < lastStep && (
         <div className="mt-8 flex items-center justify-between">
           <Button variant="ghost" onClick={goBack} disabled={step === 0}>
             Back

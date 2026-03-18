@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Combobox } from "@/components/ui/combobox";
 import { PROJECT_TYPES, type LaunchKitDraft, type TeamRole } from "@/lib/launch-kit";
+import { ROLE_SUGGESTIONS, COMPANY_SUGGESTIONS, FOCUS_SUGGESTIONS } from "@/lib/suggestions";
 
 type Props = {
   draft: LaunchKitDraft;
@@ -96,10 +97,11 @@ export function StepTeam({ draft, onChange }: Props) {
               <label className="mb-1 block text-xs text-muted-foreground">
                 Role Name
               </label>
-              <Input
+              <Combobox
                 value={member.role}
-                onChange={(e) => updateRole(i, "role", e.target.value)}
-                placeholder="e.g. Product Lead"
+                onChange={(v) => updateRole(i, "role", v)}
+                suggestions={ROLE_SUGGESTIONS}
+                placeholder="Search roles or type custom..."
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -107,20 +109,22 @@ export function StepTeam({ draft, onChange }: Props) {
                 <label className="mb-1 block text-xs text-muted-foreground">
                   Company to Model After
                 </label>
-                <Input
+                <Combobox
                   value={member.company}
-                  onChange={(e) => updateRole(i, "company", e.target.value)}
-                  placeholder="e.g. Stripe"
+                  onChange={(v) => updateRole(i, "company", v)}
+                  suggestions={COMPANY_SUGGESTIONS}
+                  placeholder="Search companies..."
                 />
               </div>
               <div>
                 <label className="mb-1 block text-xs text-muted-foreground">
                   Focus Area
                 </label>
-                <Input
+                <Combobox
                   value={member.focus}
-                  onChange={(e) => updateRole(i, "focus", e.target.value)}
-                  placeholder="e.g. API simplicity"
+                  onChange={(v) => updateRole(i, "focus", v)}
+                  suggestions={FOCUS_SUGGESTIONS}
+                  placeholder="Search focus areas..."
                 />
               </div>
             </div>
