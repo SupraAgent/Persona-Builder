@@ -80,6 +80,43 @@
 
 ---
 
+## Knowledge Graph: Link Quality
+
+### Persona Link Coverage
+
+Use this checklist to score how well persona files are integrated into the knowledge graph via `[[wikilinks]]`.
+
+| # | Check | Catches |
+|---|-------|---------|
+| 1 | Does the persona file link to at least 1 other persona via `[[wikilink]]`? | Isolated personas with no cross-references |
+| 2 | Is the persona referenced (linked to) from `team.md`? | Personas that exist but aren't on the team roster |
+| 3 | Is the persona referenced in at least 1 decision log in `docs/decisions/`? | Personas assembled but never consulted |
+| 4 | Do the persona's consultation triggers match the decisions that reference it? | Trigger/decision mismatch — persona consulted for wrong reasons |
+| 5 | Does the persona link to the phase(s) where it has authority? | Phase authority claimed but not connected |
+| 6 | Does the persona's "Related Personas" or conflict section link to partners from team.md dynamics? | Documented conflicts not reflected in persona files |
+
+### Decision Log Link Quality
+
+| # | Check | Catches |
+|---|-------|---------|
+| 1 | Does the decision link to at least 2 persona files via `[[wikilink]]`? | Single-persona decisions that skip consensus |
+| 2 | Does the decision link to `[[CONSENSUS_PROTOCOL]]` if 2+ personas were consulted? | Multi-persona decisions without protocol reference |
+| 3 | Does the decision have a `revisit` date in frontmatter? | Decisions made permanent without review trigger |
+| 4 | Does the decision link to the phase it belongs to? | Uncontextualized decisions floating without phase |
+| 5 | Does the decision document the outcome (not just positions)? | Decision logs that record debate but not resolution |
+
+### Team Graph Health
+
+| # | Check | Catches |
+|---|-------|---------|
+| 1 | Does every persona in team.md roster use a `[[wikilink]]` to the persona file? | Flat text references that don't create graph edges |
+| 2 | Does every conflict pair in Team Dynamics have at least 1 decision log showing the conflict? | Theoretical tensions never tested in practice |
+| 3 | Are there zero personas with 0 incoming links from `docs/decisions/`? | Underutilized team members |
+| 4 | Do Phase Priority personas match the personas most-linked in that phase's decision logs? | Stated priorities that don't match actual consultation patterns |
+| 5 | Is every `[[wikilink]]` in the vault resolvable to an existing file? | Broken links (typos, deleted files, moved files) |
+
+---
+
 ## Cross-Product: Persona Consultation Output
 
 Use this checklist when autoresearching the consultation prompt format itself.

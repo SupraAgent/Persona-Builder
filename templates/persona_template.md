@@ -3,6 +3,12 @@ name: "[Name]"
 role: "[Role]"
 company: "[Company]"
 title: "[Title]"
+type: persona
+team: "[project-name]"
+phase-authority:
+  - "[Phase where this persona leads]"
+aliases:
+  - "[Short name or role shorthand]"
 triggers:
   - "[Trigger 1]"
   - "[Trigger 2]"
@@ -91,6 +97,13 @@ triggers:
 | [Metric 1] | [Target] | [When] |
 | [Metric 2] | [Target] | [When] |
 | [Metric 3] | [Target] | [When] |
+
+---
+
+## Related Personas
+
+- **Complements:** [[persona-file]] — [why they work well together]
+- **Tension with:** [[persona-file]] — [what they typically disagree on]
 
 ---
 
