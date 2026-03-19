@@ -703,3 +703,24 @@ Both independent agents converged on the same recommendations:
 3. **Team Builder → Studio merge** needs phase authority and conflict modeling migrated properly.
 4. **Auto-Research needs persistent storage** — localStorage history was added but no DB persistence yet.
 5. **Launch Kit v1 team step** should use Studio's rich ROLE_PROFILES instead of simple role/company inputs.
+
+---
+
+## Top 5 Platform-Wide Missing Capabilities (from Agent Beta)
+
+Both agents identified gaps that transcend individual builders:
+
+### 1. Cross-Builder Data Flow (Critical)
+No builder can import data from another. Launch Kit can't pull Studio's team. VibeCode requires manual paste of team.md. Auto-Research loads from library but not from in-progress drafts. A shared state layer or builder-to-builder export would eliminate massive friction.
+
+### 2. Live LLM Persona Consultation (High)
+No builder lets you chat with a created persona. System prompts are generated but must be copied to another tool. An inline chat panel for consulting a persona in-context would transform the platform from "prompt factory" to "AI advisory board."
+
+### 3. Import/Resume Support (High)
+No builder has load/resume functionality. All state is lost on page refresh. No draft saving, no import from JSON. Export functions exist (`draftToExportJson`, `studioToExportJson`) but there are no corresponding import functions or UI for loading previously exported data.
+
+### 4. CSV Export Across All Builders (Moderate)
+`exportResearchToCsv` exists only in Auto-Research. Studio and Launch Kit have rich team data that would benefit from CSV export for spreadsheet users.
+
+### 5. Persona Versioning and Diff (Moderate)
+No tracking of persona evolution over time. Auto-Research can score iterations via round history, but there's no way to compare version A vs version B of a persona's system prompt. The `weeklyRetroEnabled` flag in orchestrator config has no implementation behind it.
