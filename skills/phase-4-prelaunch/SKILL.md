@@ -1,6 +1,10 @@
 ---
 name: "Phase 4: Pre-Launch"
 description: "Use when all MVP features are built and you need to verify launch readiness. Runs a checklist, persona final review, and GTM strategy."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: ["phase-3-development"]
 outputs: ["pre-launch checklist", "persona review", "GTM plan"]
 ---

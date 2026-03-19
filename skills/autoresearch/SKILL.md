@@ -1,6 +1,10 @@
 ---
 name: "Autoresearch"
 description: "Auto-improve any skill by testing it in a loop, scoring outputs against a checklist, making one small change at a time, and keeping only what improves the score. Based on Karpathy's autoresearch method."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: ["target skill file must exist"]
 outputs: ["improved skill file", "changelog", "results log", "dashboard (HTML)"]
 ---
