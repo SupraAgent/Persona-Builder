@@ -3,34 +3,25 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { StepBrief } from "./step-brief";
+import { StepContext } from "./step-context";
 import { StepTeam } from "./step-team";
-import { StepConsensus } from "./step-consensus";
 import { StepGrill } from "./step-grill";
-import { StepStack } from "./step-stack";
-import { StepRoadmap } from "./step-roadmap";
-import { StepWhitepaper } from "./step-whitepaper";
-import { StepReview } from "./step-review";
-import { EMPTY_LAUNCH_KIT, type LaunchKitDraft } from "@/lib/launch-kit";
+import { StepExport } from "./step-export";
+import { EMPTY_STUDIO_DRAFT, type StudioDraft } from "@/lib/studio";
 
 const STEPS = [
-  { label: "Brief" },
+  { label: "Context" },
   { label: "Team" },
-  { label: "Consensus" },
   { label: "Grill" },
-  { label: "Stack" },
-  { label: "Roadmap" },
-  { label: "Whitepaper" },
-  { label: "Review" },
+  { label: "Export" },
 ];
 
-export function LaunchShell() {
+export function StudioShell() {
   const [step, setStep] = React.useState(0);
-  const [draft, setDraft] = React.useState<LaunchKitDraft>(EMPTY_LAUNCH_KIT);
+  const [draft, setDraft] = React.useState<StudioDraft>(EMPTY_STUDIO_DRAFT);
   const [direction, setDirection] = React.useState(1);
 
-
-  function patchDraft(patch: Partial<LaunchKitDraft>) {
+  function patchDraft(patch: Partial<StudioDraft>) {
     setDraft((prev) => ({ ...prev, ...patch }));
   }
 
@@ -49,43 +40,34 @@ export function LaunchShell() {
   }
 
   function reset() {
-    setDraft(EMPTY_LAUNCH_KIT);
+    setDraft(EMPTY_STUDIO_DRAFT);
     setStep(0);
   }
 
   const canProceed =
     step === 0
-      ? Boolean(draft.projectName && draft.projectType)
+      ? Boolean(draft.projectName && draft.description)
       : step === 1
-        ? draft.team.length > 0
+        ? draft.personas.length > 0 && draft.personas.some((p) => p.isCeo)
         : step === 2
-          ? draft.consensus.ceoIndex !== null
-          : step === 3
-            ? draft.grillQuestions.length > 0 &&
-              draft.grillQuestions.every((q) => q.status !== "unanswered")
-            : step === 4
-              ? draft.techChoices.length > 0
-              : true;
+          ? draft.grillQuestions.length > 0 &&
+            draft.grillQuestions.every((q) => q.status !== "unanswered")
+          : true;
 
   const lastStep = STEPS.length - 1;
+  const isWide = step === 1; // Team step uses wider layout
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className={`mx-auto px-4 py-8 ${isWide ? "max-w-5xl" : "max-w-2xl"}`}>
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Launch Kit</h1>
+          <h1 className="text-2xl font-bold text-foreground">Persona Studio</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Define your project and assemble a persona team
+            Create AI advisors with ready-to-use consultation prompts
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <a
-            href="/personas"
-            className="text-sm text-muted-foreground hover:text-foreground transition"
-          >
-            My Personas
-          </a>
           {(draft.projectName || step > 0) && (
             <Button variant="ghost" size="sm" onClick={reset}>
               Start over
@@ -95,15 +77,17 @@ export function LaunchShell() {
       </div>
 
       {/* Progress */}
-      <div className="mb-8 flex items-center gap-1.5">
+      <div className="mb-8 flex items-center gap-2">
         {STEPS.map((s, i) => (
           <React.Fragment key={i}>
             <button
               onClick={() => {
-                setDirection(i > step ? 1 : -1);
-                setStep(i);
+                if (i <= step) {
+                  setDirection(i > step ? 1 : -1);
+                  setStep(i);
+                }
               }}
-              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition cursor-pointer ${
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
                 i === step
                   ? "bg-primary/10 text-primary border border-primary/30"
                   : i < step
@@ -142,14 +126,10 @@ export function LaunchShell() {
           exit={{ x: direction * -30, opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {step === 0 && <StepBrief draft={draft} onChange={patchDraft} />}
+          {step === 0 && <StepContext draft={draft} onChange={patchDraft} />}
           {step === 1 && <StepTeam draft={draft} onChange={patchDraft} />}
-          {step === 2 && <StepConsensus draft={draft} onChange={patchDraft} />}
-          {step === 3 && <StepGrill draft={draft} onChange={patchDraft} />}
-          {step === 4 && <StepStack draft={draft} onChange={patchDraft} />}
-          {step === 5 && <StepRoadmap draft={draft} onChange={patchDraft} />}
-          {step === 6 && <StepWhitepaper draft={draft} onChange={patchDraft} />}
-          {step === 7 && <StepReview draft={draft} />}
+          {step === 2 && <StepGrill draft={draft} onChange={patchDraft} />}
+          {step === 3 && <StepExport draft={draft} />}
         </motion.div>
       </AnimatePresence>
 

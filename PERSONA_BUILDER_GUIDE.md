@@ -25,200 +25,47 @@ A persona is a detailed profile of a **specific expert** modeled after a real ro
 
 ---
 
-## Option A: Pull from SupraVibe Templates
+## Creating Personas
 
-If you already have persona templates built on your **SupraVibe dashboard**:
+Three options for building your team. See [docs/reference/creating-personas.md](./docs/reference/creating-personas.md) for detailed instructions.
 
-1. Go to [supravibe.xyz](https://supravibe.xyz)
-2. Navigate to your persona templates
-3. Select the personas relevant to your project
-4. Export or reference them in your project's `docs/personas/` directory
-5. Adapt them to the specific project context if needed
+- **Option A:** Pull from SupraVibe templates (fastest when you have existing personas)
+- **Option B:** Create from scratch using `templates/persona_template.md`
+- **Option C:** Mix templates and new personas (most common)
 
-This is the fastest path when you've already built personas for similar projects.
-
-> **Future integration (planned):** SupraVibe will expose a persona API that agents can call directly:
-> ```
-> GET  /api/personas?role=retention-lead     → list available templates for a role
-> GET  /api/personas/:id                     → fetch a full persona profile
-> POST /api/personas/:id/fork               → clone and customize a template
-> POST /api/personas                        → save a new persona back to SupraVibe
-> ```
-> This will allow agents to search, pull, fork, and push personas without manual copy-paste. The agent would query SupraVibe during Step 1.2 of the project setup process, present matching templates to the user, and pull approved ones directly into `docs/personas/`. Until the API exists, the manual export workflow above is the path.
+For agent-executable instructions, use [skills/write-a-persona/SKILL.md](./skills/write-a-persona/SKILL.md).
 
 ---
 
-## Option B: Create New Personas from Scratch
+## Consulting Personas
 
-### Step 1: Identify What Expertise You Need
-
-Based on your project type, list the roles you need filled:
-
-**For a Consumer App (e.g., learning app):**
-- Product Lead — feature vision and prioritization
-- UI/UX Lead — interface design and user experience
-- Retention/Engagement Lead — onboarding, habit formation, re-engagement
-- Growth/Marketing Lead — acquisition, positioning, GTM
-- Technical Architect — system design, performance, scalability
-
-**For a SaaS Product:**
-- Product Lead — feature roadmap, customer-driven prioritization
-- UI/UX Lead — dashboard design, workflow optimization
-- Sales/Revenue Lead — pricing, packaging, conversion
-- Technical Architect — multi-tenancy, API design, integrations
-- Customer Success Lead — onboarding, churn prevention
-
-**For a Marketplace:**
-- Product Lead — two-sided marketplace dynamics
-- UI/UX Lead — search, discovery, trust signals
-- Growth Lead — supply/demand balance, network effects
-- Trust & Safety Lead — fraud prevention, content moderation
-- Technical Architect — matching algorithms, payment flows
-
-### Step 2: Find the Right Real-World Model
-
-For each role, identify a **specific person at a specific company** who represents excellence in that area.
-
-**How to choose:**
-1. Look at the comparable products you identified in Phase 1 of the project setup.
-2. Ask: *"Who at [Company X] is responsible for the thing they do best?"*
-3. Research that person's background, public talks, blog posts, and their company's approach.
-
-**Example for a Learning App:**
-
-| Role | Person | Company | Why This Person |
-|------|--------|---------|----------------|
-| Retention Lead | [Modeled after] Chief Retention Officer | Duolingo | Duolingo has the best retention in consumer education — streaks, leagues, hearts system |
-| UI/UX Lead | [Modeled after] Head of Design | Headspace | Clean, calming, accessible design that reduces cognitive load |
-| Product Lead | [Modeled after] VP Product | Khan Academy | Free education at scale, mastery-based progression |
-| Growth Lead | [Modeled after] VP Marketing | Calm | Premium positioning, content marketing, influencer strategy |
-| Tech Architect | [Modeled after] VP Engineering | Anki | Spaced repetition algorithms, offline-first, performance |
-
-### Step 3: Build the Persona Profile
-
-Use the template in `templates/persona_template.md` to flesh out each persona. Every persona profile should include:
-
-#### Core Identity
-- **Name** (can be fictional or role-based)
-- **Title & Company** (the real role being modeled)
-- **Years of Experience**
-- **Background Summary** (2-3 sentences on their career arc)
-
-#### Expertise & Skills
-- **Primary Domain** — their main area of mastery
-- **Secondary Skills** — adjacent capabilities
-- **Signature Methodology** — how they approach problems (e.g., "data-driven experimentation," "design thinking," "jobs-to-be-done framework")
-- **Tools & Frameworks** — specific tools, frameworks, or mental models they use
-
-#### Strategic Mindset
-- **Core Beliefs** — what principles guide their decisions (3-5 bullet points)
-- **What They Optimize For** — the metric or outcome they care most about
-- **What They Push Back On** — common mistakes or approaches they reject
-- **Decision-Making Style** — how they evaluate trade-offs
-
-#### Perspective on Your Project
-- **How They'd Approach This Build** — what would they prioritize first?
-- **Key Questions They'd Ask** — what would they want to know before starting?
-- **Red Flags They'd Watch For** — common pitfalls in this type of project
-- **Success Metrics** — how they'd measure if the project is working
-
-### Step 4: Save the Persona
-
-Save each persona as a markdown file in `docs/personas/`:
-```
-docs/personas/
-  retention-lead-duolingo.md
-  ux-lead-headspace.md
-  product-lead-khan-academy.md
-  growth-lead-calm.md
-  tech-architect-anki.md
-```
-
-### Step 5: Create the Team Manifest
-
-Create a `team.md` in your project root that lists all personas and their roles:
-
-```markdown
-# Project Team
-
-## Personas
-
-| Role | Persona | Modeled After | Primary Focus |
-|------|---------|---------------|--------------|
-| Retention Lead | [Name] | CRO @ Duolingo | Habit loops, streaks, re-engagement |
-| UI/UX Lead | [Name] | Head of Design @ Headspace | Calm UX, accessibility, simplicity |
-| ... | ... | ... | ... |
-
-## How to Consult
-
-When facing a decision, tag the relevant persona:
-- "As the Retention Lead, how would you design the onboarding?"
-- "As the Tech Architect, what's the right database schema for this?"
-```
+Use each persona's **consultation triggers** (defined in their YAML frontmatter) to know when to consult them. See [docs/reference/consulting-personas.md](./docs/reference/consulting-personas.md) for the full consultation pattern and multi-persona resolution.
 
 ---
 
-## Option C: Mix Templates and New Personas
+## Quality Standards
 
-The most common approach — pull what works from SupraVibe, build what's missing:
-
-1. Review your SupraVibe templates for relevant personas.
-2. Identify gaps — roles or expertise not covered by existing templates.
-3. Build new personas for the gaps using Steps 1-5 above.
-4. Document the full team in `team.md`.
+Every persona must pass the quality checklist before use. See [docs/reference/persona-quality.md](./docs/reference/persona-quality.md) for the full checklist and common anti-patterns.
 
 ---
 
-## How to Consult Personas During Development
+## Auto-Improving Skills (Autoresearch)
 
-### The Consultation Pattern
+Any skill in the ecosystem can be auto-improved using the autoresearch method (based on Karpathy's approach). The agent runs a skill in a loop, scores outputs against a yes/no checklist, makes one small change per round, and keeps only what improves the score.
 
-When you hit a decision point during development, frame the question for the relevant persona:
+- **Skill file:** [skills/autoresearch/SKILL.md](./skills/autoresearch/SKILL.md)
+- **Pre-built checklists:** [skills/autoresearch/SCORING_CHECKLISTS.md](./skills/autoresearch/SCORING_CHECKLISTS.md)
+- **Full guide:** [docs/reference/autoresearch-guide.md](./docs/reference/autoresearch-guide.md)
 
-```
-CONTEXT: [Brief description of what you're building and current state]
-DECISION: [The specific choice you need to make]
-CONSTRAINTS: [Technical, time, or resource limitations]
-QUESTION: As [Persona Name], [Title] at [Company], how would you approach this?
-```
+Best starting point: run autoresearch on `write-a-persona` — persona quality cascades through every downstream decision.
 
-### When to Consult
+---
 
-| Trigger | Which Persona |
-|---------|--------------|
-| Designing a screen or component | UI/UX Lead |
-| Choosing between features for MVP | Product Lead |
-| Designing onboarding or notifications | Retention Lead |
-| Writing copy or positioning | Growth/Marketing Lead |
-| Choosing a library or architecture pattern | Technical Architect |
-| Handling edge cases or error states | QA Lead |
+## Resolving Persona Conflicts
 
-### Resolving Persona Conflicts
+When multiple personas disagree, follow the [Consensus Protocol](./CONSENSUS_PROTOCOL.md):
 
-When consulting multiple personas and they disagree, follow the [Consensus Protocol](./CONSENSUS_PROTOCOL.md):
-
-1. Each persona states their Position, Confidence, Risk if ignored, and Compromise they'd accept
-2. ≥67% weighted agreement = consensus reached, proceed
-3. Deadlock = CEO Tiebreaker evaluates on user impact, speed to learning, reversibility, risk, alignment
+1. Each persona states Position, Confidence, Risk, and Compromise
+2. >= 67% weighted agreement = consensus, proceed
+3. Deadlock = CEO Tiebreaker
 4. User always has final override
-
-### Updating Personas
-
-Personas should evolve as the project evolves (see Phase 5 in `PROJECT_SETUP_PROCESS.md`):
-- After major pivots, revisit whether the current team is still the right fit.
-- If a persona's guidance consistently doesn't apply, swap them for a better model.
-- Add new personas as the project enters new phases (e.g., add a "Launch Manager" persona pre-launch).
-- Track decisions in `docs/decisions/` and audit revisit triggers during weekly retros.
-
----
-
-## Persona Quality Checklist
-
-Before using a persona in your project, verify:
-
-- [ ] **Specific, not generic** — modeled after a real role at a real company, not "a good designer"
-- [ ] **Relevant expertise** — their background directly applies to your project's challenges
-- [ ] **Clear point of view** — you can predict how they'd respond to a new question
-- [ ] **Actionable guidance** — their profile leads to concrete decisions, not vague advice
-- [ ] **Differentiated** — each persona on the team brings a distinct perspective
-- [ ] **Documented** — saved in `docs/personas/` with the full profile template filled out

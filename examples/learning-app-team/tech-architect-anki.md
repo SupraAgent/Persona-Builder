@@ -1,3 +1,15 @@
+---
+name: "Tomás Eriksson"
+role: "Technical Architect"
+company: "Anki"
+title: "VP of Engineering"
+triggers:
+  - "Database schema or API design decisions"
+  - "Offline-first or sync architecture"
+  - "Performance or scalability concerns"
+  - "Tech stack or library selection"
+---
+
 # Persona: Tomás Eriksson
 
 > **VP of Engineering** at **Anki** | Modeled for: Technical Architect
@@ -95,6 +107,18 @@ Week 1: Define the data model — what entities exist (users, content, reviews, 
 | Crash Rate | < 0.5% of sessions | Ongoing |
 | Database Migration Success Rate | 100% (zero data loss) | Every release |
 | Battery Impact | < 3% per 15-min session | Before launch |
+
+---
+
+## Consultation Triggers
+
+> Consult this persona when any of these conditions apply:
+
+- Database schema or API design decisions
+- Offline-first or sync architecture
+- Performance or scalability concerns
+- Tech stack or library selection
+- Data model or migration strategy
 
 ---
 

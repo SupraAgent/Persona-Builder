@@ -45,6 +45,7 @@ export function StepTeam({ draft, onChange }: Props) {
           role,
           company: "",
           focus: "",
+          triggers: [],
         })),
       });
     }
@@ -58,18 +59,40 @@ export function StepTeam({ draft, onChange }: Props) {
   }
 
   function addRole() {
-    onChange({ team: [...draft.team, { role: "", company: "", focus: "" }] });
+    onChange({ team: [...draft.team, { role: "", company: "", focus: "", triggers: [] }] });
   }
 
   function removeRole(index: number) {
     onChange({ team: draft.team.filter((_, i) => i !== index) });
   }
 
+  function addTrigger(roleIndex: number) {
+    const next = [...draft.team];
+    const triggers = [...(next[roleIndex].triggers || []), ""];
+    next[roleIndex] = { ...next[roleIndex], triggers };
+    onChange({ team: next });
+  }
+
+  function updateTrigger(roleIndex: number, triggerIndex: number, value: string) {
+    const next = [...draft.team];
+    const triggers = [...(next[roleIndex].triggers || [])];
+    triggers[triggerIndex] = value;
+    next[roleIndex] = { ...next[roleIndex], triggers };
+    onChange({ team: next });
+  }
+
+  function removeTrigger(roleIndex: number, triggerIndex: number) {
+    const next = [...draft.team];
+    const triggers = (next[roleIndex].triggers || []).filter((_, i) => i !== triggerIndex);
+    next[roleIndex] = { ...next[roleIndex], triggers };
+    onChange({ team: next });
+  }
+
   function addFromPersona(persona: SavedPersona) {
     const roleName = persona.name;
     const company = persona.role?.includes(" at ") ? persona.role.split(" at ")[1] : "";
     onChange({
-      team: [...draft.team, { role: roleName, company, focus: persona.role }],
+      team: [...draft.team, { role: roleName, company, focus: persona.role, triggers: [] }],
     });
     setShowPicker(false);
   }
@@ -155,6 +178,36 @@ export function StepTeam({ draft, onChange }: Props) {
                   placeholder="Search focus areas..."
                 />
               </div>
+            </div>
+            {/* Consultation Triggers */}
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">
+                Consult When...
+              </label>
+              {(member.triggers || []).map((trigger, ti) => (
+                <div key={ti} className="flex items-center gap-2 mb-1.5">
+                  <input
+                    value={trigger}
+                    onChange={(e) => updateTrigger(i, ti, e.target.value)}
+                    className="flex-1 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary/50"
+                    placeholder="e.g. Notification strategy needs to be defined"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeTrigger(i, ti)}
+                    className="text-xs text-muted-foreground hover:text-red-400 cursor-pointer px-1"
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => addTrigger(i)}
+                className="text-xs text-primary hover:text-primary/80 cursor-pointer"
+              >
+                + Add trigger
+              </button>
             </div>
           </div>
         ))}

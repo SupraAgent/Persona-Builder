@@ -24,6 +24,7 @@ const navGroups: NavGroup[] = [
       { label: "Agent Builder", href: "/agent", icon: "\u{1F916}" },
       { label: "Unified Builder", href: "/unified", icon: "\u26A1" },
       { label: "Launch Kit", href: "/launch-kit", icon: "\u{1F4E6}" },
+      { label: "Persona Studio", href: "/studio", icon: "\u{1F3AC}" },
     ],
   },
   {

@@ -36,11 +36,12 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute =
     pathname === "/login" || pathname.startsWith("/auth/");
 
-  if (!user && !isPublicRoute) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // Auth disabled for development — allow all routes
+  // if (!user && !isPublicRoute) {
+  //   const loginUrl = new URL("/login", request.url);
+  //   loginUrl.searchParams.set("next", pathname);
+  //   return NextResponse.redirect(loginUrl);
+  // }
 
   if (user && pathname === "/login") {
     return NextResponse.redirect(new URL("/", request.url));

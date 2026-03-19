@@ -5,8 +5,14 @@ import { Button } from "@/components/ui/button";
 import {
   PROJECT_TYPES,
   TECH_CATEGORIES,
+  PROJECT_PHASES,
+  CONFIDENCE_WEIGHTS,
   generateBriefMarkdown,
   generateTeamMarkdown,
+  generateConsensusMarkdown,
+  generateGrillMarkdown,
+  generateStackMarkdown,
+  generateRoadmapMarkdown,
   type LaunchKitDraft,
 } from "@/lib/launch-kit";
 
@@ -22,13 +28,22 @@ export function StepReview({ draft }: Props) {
   const projectType = PROJECT_TYPES.find((p) => p.id === draft.projectType);
 
   async function exportAll() {
+    const slug = slugify(draft.projectName);
     const brief = generateBriefMarkdown(draft);
     const team = generateTeamMarkdown(draft);
-    // Download as individual files since zip requires a library
-    download(brief, `${slugify(draft.projectName)}-brief.md`, "text/markdown");
-    setTimeout(() => {
-      download(team, `${slugify(draft.projectName)}-team.md`, "text/markdown");
-    }, 200);
+    const consensus = generateConsensusMarkdown(draft);
+    const grill = generateGrillMarkdown(draft);
+    const stack = generateStackMarkdown(draft);
+    const roadmap = generateRoadmapMarkdown(draft);
+
+    download(brief, `${slug}-brief.md`, "text/markdown");
+    setTimeout(() => download(team, `${slug}-team.md`, "text/markdown"), 200);
+    setTimeout(() => download(consensus, `${slug}-consensus.md`, "text/markdown"), 400);
+    if (draft.grillQuestions.length > 0) {
+      setTimeout(() => download(grill, `${slug}-grill.md`, "text/markdown"), 600);
+    }
+    setTimeout(() => download(stack, `${slug}-stack.md`, "text/markdown"), 800);
+    setTimeout(() => download(roadmap, `${slug}-roadmap.md`, "text/markdown"), 1000);
   }
 
   async function createPersonas() {
@@ -143,6 +158,114 @@ export function StepReview({ draft }: Props) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Consensus */}
+      {draft.team.length > 0 && (
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
+          <h3 className="text-sm font-medium text-foreground">
+            Consensus Protocol
+          </h3>
+          <div className="space-y-2 text-xs text-muted-foreground">
+            {draft.consensus.ceoIndex !== null && draft.team[draft.consensus.ceoIndex] && (
+              <p>
+                <span className="text-foreground font-medium">CEO:</span>{" "}
+                {draft.team[draft.consensus.ceoIndex].role}
+                {draft.team[draft.consensus.ceoIndex].company &&
+                  ` (${draft.team[draft.consensus.ceoIndex].company})`}
+              </p>
+            )}
+            <p>
+              <span className="text-foreground font-medium">Threshold:</span>{" "}
+              {draft.consensus.consensusThreshold}% agreement required
+            </p>
+            {Object.entries(draft.consensus.confidenceLevels).some(
+              ([, v]) => v !== "high"
+            ) && (
+              <div>
+                <span className="text-foreground font-medium">
+                  Custom confidence:
+                </span>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {draft.team.map((t, i) => {
+                    const conf =
+                      draft.consensus.confidenceLevels[i] || "high";
+                    return (
+                      <span
+                        key={i}
+                        className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5"
+                      >
+                        {t.role}: {conf} ({CONFIDENCE_WEIGHTS[conf]}x)
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {Object.entries(draft.consensus.phaseAuthority).filter(
+              ([, v]) => v !== null
+            ).length > 0 && (
+              <div>
+                <span className="text-foreground font-medium">
+                  Phase leads:
+                </span>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {Object.entries(draft.consensus.phaseAuthority)
+                    .filter(([, v]) => v !== null)
+                    .map(([phaseId, idx]) => {
+                      const phase = PROJECT_PHASES.find(
+                        (p) => p.id === phaseId
+                      );
+                      const member =
+                        idx !== null ? draft.team[idx] : null;
+                      return phase && member ? (
+                        <span
+                          key={phaseId}
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5"
+                        >
+                          {phase.label}: {member.role}
+                        </span>
+                      ) : null;
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Grill Results */}
+      {draft.grillQuestions.length > 0 && (
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
+          <h3 className="text-sm font-medium text-foreground">Persona Grill</h3>
+          <div className="flex gap-3 text-xs text-muted-foreground">
+            <span className="text-green-400">
+              {draft.grillQuestions.filter((q) => q.status === "answered").length} answered
+            </span>
+            <span className="text-yellow-400">
+              {draft.grillQuestions.filter((q) => q.status === "acknowledged").length} acknowledged
+            </span>
+          </div>
+          <div className="space-y-1.5 mt-2">
+            {draft.grillQuestions
+              .filter((q) => q.status === "answered" && q.response)
+              .slice(0, 3)
+              .map((q, i) => {
+                const member = draft.team[q.personaIndex];
+                return (
+                  <div key={i} className="text-xs">
+                    <span className="text-muted-foreground">{member?.role}: </span>
+                    <span className="text-foreground">{q.response.slice(0, 120)}{q.response.length > 120 ? "..." : ""}</span>
+                  </div>
+                );
+              })}
+            {draft.grillQuestions.filter((q) => q.status === "answered").length > 3 && (
+              <p className="text-[10px] text-muted-foreground/60">
+                +{draft.grillQuestions.filter((q) => q.status === "answered").length - 3} more responses
+              </p>
+            )}
           </div>
         </div>
       )}
