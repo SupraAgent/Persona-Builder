@@ -14,30 +14,60 @@ type PersonaInput = {
   style?: string;
 };
 
+type SavedPersona = {
+  id: string;
+  name: string;
+  role: string;
+  system_prompt: string;
+  capabilities: string[];
+  icon: string | null;
+};
+
 export function ResearchPanel() {
   const [backend, setBackend] = React.useState<"anthropic" | "ollama">("anthropic");
   const [model, setModel] = React.useState("claude-sonnet-4-6");
   const [projectContext, setProjectContext] = React.useState("");
   const [sampleDecision, setSampleDecision] = React.useState("");
-  const [personas, setPersonas] = React.useState<PersonaInput[]>([
-    { name: "", role: "", company: "", systemPrompt: "", style: "" },
-  ]);
+  const [personas, setPersonas] = React.useState<PersonaInput[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [result, setResult] = React.useState<AutoResearchResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  function addPersona() {
-    setPersonas([...personas, { name: "", role: "", company: "", systemPrompt: "", style: "" }]);
-  }
+  // Saved personas from library
+  const [savedPersonas, setSavedPersonas] = React.useState<SavedPersona[]>([]);
+  const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [loadingPersonas, setLoadingPersonas] = React.useState(true);
 
-  function removePersona(i: number) {
-    setPersonas(personas.filter((_, idx) => idx !== i));
-  }
+  React.useEffect(() => {
+    async function fetchPersonas() {
+      try {
+        const res = await fetch("/api/personas");
+        if (res.ok) {
+          const data = await res.json();
+          setSavedPersonas(data);
+        }
+      } catch {
+        // silently fail — user can still create personas
+      } finally {
+        setLoadingPersonas(false);
+      }
+    }
+    fetchPersonas();
+  }, []);
 
-  function updatePersona(i: number, patch: Partial<PersonaInput>) {
-    const next = [...personas];
-    next[i] = { ...next[i], ...patch };
-    setPersonas(next);
+  function togglePersona(p: SavedPersona) {
+    const next = new Set(selectedIds);
+    if (next.has(p.id)) {
+      next.delete(p.id);
+      setPersonas((prev) => prev.filter((x) => x.name !== p.name || x.role !== p.role));
+    } else {
+      next.add(p.id);
+      setPersonas((prev) => [
+        ...prev,
+        { name: p.name, role: p.role, company: "", systemPrompt: p.system_prompt, style: "" },
+      ]);
+    }
+    setSelectedIds(next);
   }
 
   async function runResearch() {
@@ -167,56 +197,66 @@ export function ResearchPanel() {
           <div>
             <h2 className="text-lg font-semibold text-foreground">Personas to Evaluate</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Add personas — the research will score, find gaps, and suggest improvements.
+              Select personas from your library — the research will score, find gaps, and suggest improvements.
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={addPersona} className="text-xs">
-            + Add persona
-          </Button>
+          <a href="/personas">
+            <Button variant="ghost" size="sm" className="text-xs">
+              + Create New Persona
+            </Button>
+          </a>
         </div>
-        <div className="mt-3 space-y-3">
-          {personas.map((p, i) => (
-            <div key={i} className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">Persona {i + 1}</span>
-                {personas.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removePersona(i)}
-                    className="text-xs text-muted-foreground hover:text-red-400 cursor-pointer"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <Input
-                  value={p.name}
-                  onChange={(e) => updatePersona(i, { name: e.target.value })}
-                  placeholder="Name"
-                  className="text-sm"
-                />
-                <Input
-                  value={p.role}
-                  onChange={(e) => updatePersona(i, { role: e.target.value })}
-                  placeholder="Role (e.g. CTO)"
-                  className="text-sm"
-                />
-                <Input
-                  value={p.company}
-                  onChange={(e) => updatePersona(i, { company: e.target.value })}
-                  placeholder="Company"
-                  className="text-sm"
-                />
-              </div>
-              <Textarea
-                value={p.systemPrompt}
-                onChange={(e) => updatePersona(i, { systemPrompt: e.target.value })}
-                placeholder="System prompt or background description..."
-                className="min-h-[60px] text-xs"
-              />
+        <div className="mt-3">
+          {loadingPersonas ? (
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-8 text-center">
+              <span className="text-sm text-muted-foreground animate-pulse">Loading personas...</span>
             </div>
-          ))}
+          ) : savedPersonas.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-8 text-center space-y-3">
+              <div className="text-sm text-muted-foreground">
+                No personas yet. Create one to get started.
+              </div>
+              <a href="/personas">
+                <Button size="sm">Create Your First Persona</Button>
+              </a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {savedPersonas.map((p) => {
+                const selected = selectedIds.has(p.id);
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => togglePersona(p)}
+                    className={`rounded-xl border p-4 text-left transition cursor-pointer ${
+                      selected
+                        ? "border-primary/60 bg-primary/10"
+                        : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {selected && (
+                        <svg className="h-4 w-4 text-primary flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                      )}
+                      <span className="text-sm font-medium text-foreground">
+                        {p.icon && <span className="mr-1.5">{p.icon}</span>}
+                        {p.name}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">{p.role}</div>
+                    {p.system_prompt && (
+                      <div className="mt-1.5 text-xs text-muted-foreground/60 line-clamp-2">
+                        {p.system_prompt}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
