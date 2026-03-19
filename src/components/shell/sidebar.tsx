@@ -42,8 +42,9 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    title: "LIBRARY",
+    title: "KNOWLEDGE",
     items: [
+      { label: "Docs Dashboard", href: "/dashboard", icon: "\u{1F5C2}\uFE0F" },
       { label: "My Personas", href: "/personas", icon: "\u{1F4DA}" },
     ],
   },
