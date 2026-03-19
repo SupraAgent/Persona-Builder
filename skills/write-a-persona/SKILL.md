@@ -1,6 +1,10 @@
 ---
 name: "Write a Persona"
 description: "Use when you need to create a new expert persona profile. Produces a complete persona file with YAML frontmatter, all required sections, consultation triggers, and a ready-to-use consultation prompt."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: []
 outputs: ["docs/personas/{role}-{company}.md"]
 ---

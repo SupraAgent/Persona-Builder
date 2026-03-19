@@ -1,6 +1,10 @@
 ---
 name: "Phase 2: Tech Stack & Infrastructure"
 description: "Use when the persona team is assembled and you need to choose a tech stack and set up project infrastructure. Consult the Technical Architect persona for all decisions."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: ["phase-1-personas"]
 outputs: ["GitHub repo", "deployed skeleton", "configured auth/database"]
 ---

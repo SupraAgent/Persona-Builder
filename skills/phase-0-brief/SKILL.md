@@ -1,6 +1,10 @@
 ---
 name: "Phase 0: Project Brief"
 description: "Use when starting a new project from scratch. Gathers requirements from the user, identifies comparable products, and produces a structured project-brief.md file."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: []
 outputs: ["project-brief.md"]
 ---

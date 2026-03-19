@@ -1,6 +1,10 @@
 ---
 name: "Phase 3: Development Kickoff"
 description: "Use when infrastructure is ready and you're starting to build features. Consult personas at every decision point using the three-level consultation cadence."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: ["phase-2-stack"]
 outputs: ["CLAUDE.md", "MVP features", "GitHub issues"]
 ---

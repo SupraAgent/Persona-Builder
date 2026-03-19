@@ -1,6 +1,10 @@
 ---
 name: "Phase 1: Assemble Persona Team"
 description: "Use when the project brief is complete and you need to build a team of expert personas before any code is written. Mandatory — no code until the team is assembled."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: ["phase-0-brief"]
 outputs: ["docs/personas/*.md", "team.md"]
 ---

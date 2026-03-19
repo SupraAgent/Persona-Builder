@@ -1,6 +1,10 @@
 ---
 name: "Phase 5: Post-Launch Iteration"
 description: "Use after launch to monitor performance, run persona retros, and evolve the team. This phase runs continuously on a weekly cadence."
+license: "MIT"
+metadata:
+  version: "1.0.0"
+  creator: "SupraAgent"
 dependencies: ["phase-4-prelaunch"]
 outputs: ["docs/post-launch-scorecard.md", "weekly retros", "decision audits"]
 ---

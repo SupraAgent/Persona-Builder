@@ -1,0 +1,59 @@
+{
+  "name": "persona-builder",
+  "version": "1.0.0",
+  "description": "Expert persona team framework — assemble AI personas before writing code, then consult them at every decision point.",
+  "author": "SupraAgent",
+  "license": "MIT",
+  "repository": "github:SupraAgent/Persona-Builder",
+  "skills": [
+    {
+      "name": "phase-0-brief",
+      "path": "skills/phase-0-brief/SKILL.md",
+      "description": "Gather requirements and produce a structured project brief"
+    },
+    {
+      "name": "phase-1-personas",
+      "path": "skills/phase-1-personas/SKILL.md",
+      "description": "Assemble a team of expert personas before any code is written"
+    },
+    {
+      "name": "phase-2-stack",
+      "path": "skills/phase-2-stack/SKILL.md",
+      "description": "Choose tech stack and set up project infrastructure"
+    },
+    {
+      "name": "phase-3-development",
+      "path": "skills/phase-3-development/SKILL.md",
+      "description": "Build features with persona consultation at every decision point"
+    },
+    {
+      "name": "phase-4-prelaunch",
+      "path": "skills/phase-4-prelaunch/SKILL.md",
+      "description": "Verify launch readiness with checklist and persona review"
+    },
+    {
+      "name": "phase-5-postlaunch",
+      "path": "skills/phase-5-postlaunch/SKILL.md",
+      "description": "Monitor, iterate, and evolve the team post-launch"
+    },
+    {
+      "name": "write-a-persona",
+      "path": "skills/write-a-persona/SKILL.md",
+      "description": "Create a new expert persona profile with consultation prompt"
+    },
+    {
+      "name": "autoresearch",
+      "path": "skills/autoresearch/SKILL.md",
+      "description": "Auto-improve any skill via test-score-tweak loops"
+    }
+  ],
+  "installDirectory": ".agent/skills",
+  "includes": [
+    "CLAUDE.md",
+    "PROJECT_SETUP_PROCESS.md",
+    "CONSENSUS_PROTOCOL.md",
+    "PERSONA_BUILDER_GUIDE.md",
+    "templates/persona_template.md",
+    "templates/persona_check.md"
+  ]
+}
