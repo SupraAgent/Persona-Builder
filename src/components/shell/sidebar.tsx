@@ -18,21 +18,27 @@ type NavGroup = {
 
 const navGroups: NavGroup[] = [
   {
-    title: "BUILDERS",
+    title: "PERSONAS",
     items: [
       { label: "Expert Persona", href: "/expert", icon: "\u{1F9E0}" },
       { label: "Agent Builder", href: "/agent", icon: "\u{1F916}" },
       { label: "Unified Builder", href: "/unified", icon: "\u26A1" },
-      { label: "Launch Kit", href: "/launch-kit", icon: "\u{1F4E6}" },
       { label: "Persona Studio", href: "/studio", icon: "\u{1F3AC}" },
+      { label: "Team Builder", href: "/builder-v2", icon: "\u{1F465}" },
     ],
   },
   {
-    title: "V2",
+    title: "LAUNCH",
     items: [
-      { label: "Persona Builder 2", href: "/builder-v2", icon: "\u{1F465}" },
+      { label: "Launch Kit", href: "/launch-kit", icon: "\u{1F4E6}" },
       { label: "Launch Kit 2", href: "/launch-v2", icon: "\u{1F680}" },
       { label: "VibeCode", href: "/vibecode", icon: "\u{1F3B5}" },
+    ],
+  },
+  {
+    title: "RESEARCH",
+    items: [
+      { label: "Auto-Research", href: "/consult", icon: "\u{1F50D}" },
     ],
   },
   {
