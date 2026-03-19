@@ -117,6 +117,31 @@ Use this checklist to score how well persona files are integrated into the knowl
 
 ---
 
+## Design & Stitch Skills
+
+### Design System Synthesis (`skills/design-system/SKILL.md`)
+
+| # | Check | Catches |
+|---|-------|---------|
+| 1 | Does every color in the palette include BOTH a descriptive name AND a hex code? | Missing hex codes that leave agents guessing, or bare hex codes without semantic meaning |
+| 2 | Does the atmosphere section use at least 2 evocative adjectives (not just "clean" or "modern")? | Generic descriptions that don't constrain design choices |
+| 3 | Does every component pattern describe shape, color, AND behavior (not just one)? | Incomplete component specs that leave agents filling in gaps |
+| 4 | Does Section 6 (Persona Design Principles) reference specific beliefs from the UI/UX persona file? | Design principles disconnected from persona guidance |
+| 5 | Does the anti-patterns section (Section 7) list at least 3 specific things to avoid? | Missing constraints that let agents introduce rejected patterns |
+| 6 | Is every typography entry described semantically (not just font-size values)? | Technical specs without design intent |
+
+### Stitch Bridge (`skills/stitch-bridge/SKILL.md`)
+
+| # | Check | Catches |
+|---|-------|---------|
+| 1 | Was the UI/UX persona consulted BEFORE the Stitch prompt was written? | Generating screens without persona guidance |
+| 2 | Does the Stitch prompt include at least 2 specific values from DESIGN.md (hex codes, shape descriptions)? | Generic prompts that produce inconsistent screens |
+| 3 | Was the generated screen validated against persona principles before export? | Exporting unreviewed designs |
+| 4 | Was DESIGN.md updated if the generated screen introduced new patterns? | Design drift from undocumented changes |
+| 5 | Does the exported code reference design tokens (not hardcoded values)? | Brittle code that breaks when design evolves |
+
+---
+
 ## Cross-Product: Persona Consultation Output
 
 Use this checklist when autoresearching the consultation prompt format itself.

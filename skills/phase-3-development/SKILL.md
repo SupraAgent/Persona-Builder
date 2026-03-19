@@ -13,7 +13,7 @@ outputs: ["CLAUDE.md", "MVP features", "GitHub issues"]
 
 ### 1. Create Project CLAUDE.md `[AGENT]`
 
-Write `CLAUDE.md` with: project description, tech stack, coding conventions, persona team reference.
+Write `CLAUDE.md` with: project description, tech stack, coding conventions, persona team reference, and a design system section pointing to `DESIGN.md`.
 
 ### 2. Plan Build Order `[ASK]`
 
@@ -31,6 +31,17 @@ Consult personas at three levels — see [REFERENCE.md](./REFERENCE.md) for the 
 ### 4. Set Up Dev Workflow `[AGENT]`
 
 Configure linting, formatting, branch conventions, initial GitHub issues.
+
+### 5. Design-to-Code Pipeline (Optional) `[AGENT]`
+
+If using [Google Stitch](https://stitch.withgoogle.com/) for design:
+
+1. Use the [Stitch Bridge](../stitch-bridge/SKILL.md) skill to generate screens from persona guidance
+2. For each feature screen: consult persona → enhance prompt → generate in Stitch → validate → export code
+3. Use the baton system (`.stitch/next-prompt.md`) for multi-page autonomous generation
+4. Update `DESIGN.md` whenever new visual patterns emerge
+
+Even without Stitch, always consult `DESIGN.md` before building any UI component to maintain design consistency.
 
 ## Gate
 

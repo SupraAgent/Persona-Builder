@@ -40,6 +40,8 @@ When a user asks you to start a new project, you follow the runbook in `PROJECT_
 | `docs/reference/` | Detailed reference docs: creating, consulting, and quality-checking personas |
 | `templates/persona_template.md` | Blank persona profile template (with YAML frontmatter) |
 | `templates/persona_check.md` | Pre-flight checklist before leaving persona phase |
+| `skills/design-system/` | Generate DESIGN.md — agent-readable design system from persona guidance |
+| `skills/stitch-bridge/` | Connect personas to Google Stitch for AI-powered UI design & code export |
 | `examples/` | Example teams: learning app, SaaS analytics, marketplace |
 
 ## Quick Start

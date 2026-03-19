@@ -25,7 +25,7 @@ Each phase is a standalone skill file with detailed steps, `[ASK]`/`[AGENT]` mar
 ```
 Phase 0 -> 1:  project-brief.md exists with all answers
 Phase 1 -> 2:  Persona file for every role, team.md exists, user approved
-Phase 2 -> 3:  Repo exists, stack deployable, auth + database configured
+Phase 2 -> 3:  Repo exists, stack deployable, auth + database configured, DESIGN.md created
 Phase 3 -> 4:  All MVP features functional, personas consulted, user approved
 Phase 4 -> Launch:  Checklist passes, persona review done, GTM decided
 Phase 5:  Ongoing -- weekly retros, metric tracking, team evolution
@@ -54,6 +54,21 @@ Any skill in this framework can be auto-improved using the autoresearch method. 
 | [docs/reference/autoresearch-guide.md](./docs/reference/autoresearch-guide.md) | Full guide: when to run, cross-product strategy, changelog value |
 
 **When to run:** After writing a new skill, when a skill produces inconsistent quality, after model upgrades, or during Phase 5 weekly retros.
+
+---
+
+## Design System & Stitch Integration
+
+The framework includes skills for establishing and maintaining a visual design system, with optional integration into Google Stitch for AI-powered screen generation.
+
+| Resource | Purpose |
+|----------|---------|
+| [skills/design-system/SKILL.md](./skills/design-system/SKILL.md) | Generate `DESIGN.md` — an agent-readable design system from persona guidance |
+| [skills/stitch-bridge/SKILL.md](./skills/stitch-bridge/SKILL.md) | Connect personas to Google Stitch for UI design & code export |
+
+**When to use:** `DESIGN.md` is generated in Phase 2 (after stack selection) and consulted throughout Phase 3 (before building any UI). The Stitch Bridge is optional — use it when the team wants AI-generated screen designs.
+
+**Key concept:** `DESIGN.md` captures colors, typography, components, and layout in semantic language that AI agents can read. Every color includes a descriptive name + hex code + functional role. Every component is described by shape, color, and behavior. Persona design principles and anti-patterns constrain what agents generate.
 
 ---
 
