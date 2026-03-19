@@ -27,6 +27,14 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    title: "V2",
+    items: [
+      { label: "Persona Builder 2", href: "/builder-v2", icon: "\u{1F465}" },
+      { label: "Launch Kit 2", href: "/launch-v2", icon: "\u{1F680}" },
+      { label: "VibeCode", href: "/vibecode", icon: "\u{1F3B5}" },
+    ],
+  },
+  {
     title: "LIBRARY",
     items: [
       { label: "My Personas", href: "/personas", icon: "\u{1F4DA}" },
