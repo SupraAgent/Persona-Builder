@@ -39,6 +39,12 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    title: "ORCHESTRATION",
+    items: [
+      { label: "Paperclip Bridge", href: "/paperclip", icon: "\u{1F4CE}" },
+    ],
+  },
+  {
     title: "KNOWLEDGE",
     items: [
       { label: "Docs Dashboard", href: "/dashboard", icon: "\u{1F5C2}\uFE0F" },
