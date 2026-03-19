@@ -43,6 +43,20 @@ Phase 5:  Ongoing -- weekly retros, metric tracking, team evolution
 
 ---
 
+## Autoresearch (Skill Self-Improvement)
+
+Any skill in this framework can be auto-improved using the autoresearch method. The agent tests a skill in a loop, scores outputs against a yes/no checklist, makes one small change at a time, and keeps only what improves the score.
+
+| Resource | Purpose |
+|----------|---------|
+| [skills/autoresearch/SKILL.md](./skills/autoresearch/SKILL.md) | The autoresearch skill — run this to optimize any other skill |
+| [skills/autoresearch/SCORING_CHECKLISTS.md](./skills/autoresearch/SCORING_CHECKLISTS.md) | Pre-built checklists for every skill in the ecosystem |
+| [docs/reference/autoresearch-guide.md](./docs/reference/autoresearch-guide.md) | Full guide: when to run, cross-product strategy, changelog value |
+
+**When to run:** After writing a new skill, when a skill produces inconsistent quality, after model upgrades, or during Phase 5 weekly retros.
+
+---
+
 ## Consensus Protocol
 
 When multiple personas disagree, follow [CONSENSUS_PROTOCOL.md](./CONSENSUS_PROTOCOL.md):
