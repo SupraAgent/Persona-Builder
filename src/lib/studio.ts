@@ -12,6 +12,9 @@ export type StudioPersona = {
   confidence: ConfidenceLevel;
   isCeo: boolean;
   promptOverride: string | null;
+  llmProvider: string;
+  llmModel: string;
+  skills: string[];
 };
 
 export type StudioGrillQuestion = {
@@ -46,7 +49,31 @@ export const EMPTY_PERSONA: StudioPersona = {
   confidence: "high",
   isCeo: false,
   promptOverride: null,
+  llmProvider: "",
+  llmModel: "",
+  skills: [],
 };
+
+export const SUGGESTED_TEAM_SIZES = [
+  {
+    id: "starter",
+    label: "Starter (3)",
+    description: "Product Lead, Tech Architect, UI/UX Lead",
+    roles: ["Product Lead", "Tech Architect", "UI/UX Lead"],
+  },
+  {
+    id: "growth",
+    label: "Growth (5)",
+    description: "Add Retention Lead + Growth Lead",
+    roles: ["Product Lead", "Tech Architect", "UI/UX Lead", "Retention Lead", "Growth Lead"],
+  },
+  {
+    id: "full",
+    label: "Full Team (7)",
+    description: "Add Revenue Lead + QA Lead",
+    roles: ["Product Lead", "Tech Architect", "UI/UX Lead", "Retention Lead", "Growth Lead", "Revenue Lead", "QA Lead"],
+  },
+];
 
 export const EMPTY_STUDIO_DRAFT: StudioDraft = {
   projectName: "",
@@ -426,6 +453,21 @@ export function generatePersonaPrompt(
     lines.push("");
   }
 
+  if (persona.skills.length > 0) {
+    lines.push(`## Skills & Capabilities`);
+    persona.skills.forEach((s) => lines.push(`- ${s}`));
+    lines.push("");
+  }
+
+  if (persona.llmProvider || persona.llmModel) {
+    lines.push(`## Preferred LLM`);
+    const parts: string[] = [];
+    if (persona.llmProvider) parts.push(`Provider: ${persona.llmProvider}`);
+    if (persona.llmModel) parts.push(`Model: ${persona.llmModel}`);
+    lines.push(parts.join(" | "));
+    lines.push("");
+  }
+
   if (persona.triggers.length > 0) {
     lines.push(`## Consultation Triggers`);
     lines.push(`Consult this advisor when:`);
@@ -716,11 +758,12 @@ export function generateStudioTeamMd(draft: StudioDraft): string {
   // Roster table
   lines.push("## Roster");
   lines.push("");
-  lines.push("| Role | Company | Focus | Confidence | CEO |");
-  lines.push("|------|---------|-------|:----------:|:---:|");
+  lines.push("| Role | Company | Focus | Confidence | LLM | CEO |");
+  lines.push("|------|---------|-------|:----------:|-----|:---:|");
   draft.personas.forEach((p) => {
+    const llm = p.llmModel || p.llmProvider || "—";
     lines.push(
-      `| ${p.role} | ${p.company || "—"} | ${p.focus || "—"} | ${p.confidence} | ${p.isCeo ? "\u2713" : "\u2014"} |`
+      `| ${p.role} | ${p.company || "—"} | ${p.focus || "—"} | ${p.confidence} | ${llm} | ${p.isCeo ? "\u2713" : "\u2014"} |`
     );
   });
   lines.push("");
@@ -840,6 +883,9 @@ export function studioToExportJson(draft: StudioDraft): string {
       confidence: p.confidence,
       isCeo: p.isCeo,
       triggers: p.triggers,
+      llmProvider: p.llmProvider,
+      llmModel: p.llmModel,
+      skills: p.skills,
       systemPrompt: getPersonaPrompt(p, context),
       promptOverride: p.promptOverride,
     })),

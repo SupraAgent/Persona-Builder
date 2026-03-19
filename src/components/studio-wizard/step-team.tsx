@@ -9,9 +9,11 @@ import {
   getPersonaPrompt,
   inferRoleIcon,
   PROJECT_PHASES,
+  SUGGESTED_TEAM_SIZES,
   type StudioDraft,
   type StudioPersona,
 } from "@/lib/studio";
+import { LLM_PROVIDERS } from "@/lib/agent-personas";
 import { CONFIDENCE_WEIGHTS, type ConfidenceLevel } from "@/lib/launch-kit";
 import {
   ROLE_SUGGESTIONS,
@@ -97,6 +99,30 @@ export function StepTeam({ draft, onChange }: Props) {
           Add advisors and watch their consultation prompt generate in real time.
         </p>
       </div>
+
+      {/* Quick-start team sizes */}
+      {draft.personas.length === 0 && (
+        <div className="flex gap-3">
+          {SUGGESTED_TEAM_SIZES.map((size) => (
+            <button
+              key={size.id}
+              type="button"
+              onClick={() => {
+                const newPersonas: StudioPersona[] = size.roles.map((role, i) => ({
+                  ...EMPTY_PERSONA,
+                  role,
+                  isCeo: i === 0,
+                }));
+                onChange({ personas: newPersonas, activePersonaIndex: 0 });
+              }}
+              className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-left hover:border-primary/30 hover:bg-primary/[0.02] transition"
+            >
+              <span className="text-sm font-medium text-foreground">{size.label}</span>
+              <p className="text-[10px] text-muted-foreground mt-1">{size.description}</p>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-6">
         {/* Left column — persona cards */}
@@ -204,6 +230,98 @@ export function StepTeam({ draft, onChange }: Props) {
                     {level} ({CONFIDENCE_WEIGHTS[level]}x)
                   </button>
                 ))}
+              </div>
+
+              {/* LLM Selection */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">
+                    LLM Provider <span className="text-white/30">(optional)</span>
+                  </label>
+                  <select
+                    value={persona.llmProvider}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      const provider = LLM_PROVIDERS.find((p) => p.id === e.target.value);
+                      updatePersona(i, {
+                        llmProvider: e.target.value,
+                        llmModel: provider?.models[0]?.id || "",
+                      });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full h-8 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground"
+                  >
+                    <option value="">— none —</option>
+                    {LLM_PROVIDERS.map((p) => (
+                      <option key={p.id} value={p.id}>{p.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">
+                    Model
+                  </label>
+                  <select
+                    value={persona.llmModel}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      updatePersona(i, { llmModel: e.target.value });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    disabled={!persona.llmProvider}
+                    className="w-full h-8 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground disabled:opacity-40"
+                  >
+                    <option value="">— select —</option>
+                    {LLM_PROVIDERS.find((p) => p.id === persona.llmProvider)?.models.map((m) => (
+                      <option key={m.id} value={m.id}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <label className="mb-1 block text-xs text-muted-foreground">
+                  Skills <span className="text-white/30">(optional)</span>
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                  {persona.skills.map((skill, si) => (
+                    <span
+                      key={si}
+                      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-foreground"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updatePersona(i, {
+                            skills: persona.skills.filter((_, j) => j !== si),
+                          });
+                        }}
+                        className="text-muted-foreground hover:text-red-400 ml-0.5"
+                      >
+                        x
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  placeholder="Type a skill and press Enter"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (val && !persona.skills.includes(val)) {
+                        updatePersona(i, { skills: [...persona.skills, val] });
+                        (e.target as HTMLInputElement).value = "";
+                      }
+                    }
+                  }}
+                  className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary/50"
+                />
               </div>
 
               {/* Triggers */}
