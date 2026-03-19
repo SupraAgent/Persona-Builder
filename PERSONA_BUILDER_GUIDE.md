@@ -49,6 +49,18 @@ Every persona must pass the quality checklist before use. See [docs/reference/pe
 
 ---
 
+## Auto-Improving Skills (Autoresearch)
+
+Any skill in the ecosystem can be auto-improved using the autoresearch method (based on Karpathy's approach). The agent runs a skill in a loop, scores outputs against a yes/no checklist, makes one small change per round, and keeps only what improves the score.
+
+- **Skill file:** [skills/autoresearch/SKILL.md](./skills/autoresearch/SKILL.md)
+- **Pre-built checklists:** [skills/autoresearch/SCORING_CHECKLISTS.md](./skills/autoresearch/SCORING_CHECKLISTS.md)
+- **Full guide:** [docs/reference/autoresearch-guide.md](./docs/reference/autoresearch-guide.md)
+
+Best starting point: run autoresearch on `write-a-persona` — persona quality cascades through every downstream decision.
+
+---
+
 ## Resolving Persona Conflicts
 
 When multiple personas disagree, follow the [Consensus Protocol](./CONSENSUS_PROTOCOL.md):

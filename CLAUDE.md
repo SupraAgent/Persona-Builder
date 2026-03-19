@@ -36,6 +36,7 @@ When a user asks you to start a new project, you follow the runbook in `PROJECT_
 | `skills/write-a-persona/` | Meta-skill for creating persona profiles with quality constraints |
 | `PERSONA_BUILDER_GUIDE.md` | Quick-start guide on creating and using personas |
 | `CONSENSUS_PROTOCOL.md` | How personas resolve disagreements (2/3 majority + CEO tiebreaker) |
+| `skills/autoresearch/` | Auto-improve any skill via test-score-tweak loops (Karpathy's method) |
 | `docs/reference/` | Detailed reference docs: creating, consulting, and quality-checking personas |
 | `templates/persona_template.md` | Blank persona profile template (with YAML frontmatter) |
 | `templates/persona_check.md` | Pre-flight checklist before leaving persona phase |
