@@ -33,6 +33,9 @@ export type StudioDraft = ProjectContext & {
   consensusThreshold: number;
   grillQuestions: StudioGrillQuestion[];
   activePersonaIndex: number;
+  phaseAuthority: Array<{ phase: number; personaIndex: number }>; // which persona leads each phase
+  expectedConflicts: Array<{ betweenIndices: [number, number]; topic: string }>;
+  northStar: string;
 };
 
 export const EMPTY_PERSONA: StudioPersona = {
@@ -54,7 +57,26 @@ export const EMPTY_STUDIO_DRAFT: StudioDraft = {
   consensusThreshold: 67,
   grillQuestions: [],
   activePersonaIndex: 0,
+  phaseAuthority: [],
+  expectedConflicts: [],
+  northStar: "",
 };
+
+export const PROJECT_PHASES = [
+  { index: 0, name: "Project Brief" },
+  { index: 1, name: "Personas" },
+  { index: 2, name: "Tech Stack" },
+  { index: 3, name: "Development" },
+  { index: 4, name: "Pre-Launch" },
+  { index: 5, name: "Post-Launch" },
+];
+
+export function generateStudioNorthStar(draft: StudioDraft): string {
+  const ceo = draft.personas.find(p => p.isCeo);
+  const ceoRole = ceo?.role || "the team";
+  const focus = draft.personas.map(p => p.focus).filter(Boolean).join(", ");
+  return `Led by ${ceoRole}, this team will build ${draft.projectName} for ${draft.targetUser}. Focus areas: ${focus || "to be defined"}. Consensus threshold: ${draft.consensusThreshold}%.`;
+}
 
 /* --------------- Role-based prompt content --------------- */
 
@@ -674,6 +696,182 @@ export function generateConsensusBlock(draft: StudioDraft): string {
   lines.push(`4. User always has final override`);
 
   return lines.join("\n");
+}
+
+/* --------------- Utilities --------------- */
+
+/* --------------- Team MD Export --------------- */
+
+export function generateStudioTeamMd(draft: StudioDraft): string {
+  const lines: string[] = [];
+  const ceo = draft.personas.find((p) => p.isCeo);
+
+  lines.push(`# Team: ${draft.projectName || "Untitled Project"}`);
+  lines.push("");
+  lines.push(`> ${draft.description || "No description"}`);
+  lines.push(`> Target: ${draft.targetUser || "Not specified"}`);
+  lines.push(`> Problem: ${draft.problem || "Not specified"}`);
+  lines.push("");
+
+  // Roster table
+  lines.push("## Roster");
+  lines.push("");
+  lines.push("| Role | Company | Focus | Confidence | CEO |");
+  lines.push("|------|---------|-------|:----------:|:---:|");
+  draft.personas.forEach((p) => {
+    lines.push(
+      `| ${p.role} | ${p.company || "—"} | ${p.focus || "—"} | ${p.confidence} | ${p.isCeo ? "\u2713" : "\u2014"} |`
+    );
+  });
+  lines.push("");
+
+  // Consensus
+  lines.push("## Consensus Protocol");
+  lines.push("");
+  lines.push(`- **Threshold:** ${draft.consensusThreshold}%`);
+  lines.push(`- **Tiebreaker:** ${ceo ? ceo.role : "None designated"}`);
+  lines.push(`- **Voting Weights:** High=1.0x, Medium=0.7x, Low=0.4x`);
+  lines.push("");
+
+  // Phase Authority
+  if (draft.phaseAuthority.length > 0) {
+    lines.push("## Phase Authority (1.5x voting weight)");
+    lines.push("");
+    lines.push("| Phase | Lead |");
+    lines.push("|-------|------|");
+    for (const pa of draft.phaseAuthority) {
+      const phaseName = PROJECT_PHASES.find((p) => p.index === pa.phase)?.name ?? `Phase ${pa.phase}`;
+      const leadRole = draft.personas[pa.personaIndex]?.role ?? "Unknown";
+      lines.push(`| ${phaseName} | ${leadRole} |`);
+    }
+    lines.push("");
+  }
+
+  // Expected Conflicts
+  if (draft.expectedConflicts.length > 0) {
+    lines.push("## Expected Conflicts");
+    lines.push("");
+    lines.push("| Between | Topic |");
+    lines.push("|---------|-------|");
+    for (const ec of draft.expectedConflicts) {
+      const roleA = draft.personas[ec.betweenIndices[0]]?.role ?? "Unknown";
+      const roleB = draft.personas[ec.betweenIndices[1]]?.role ?? "Unknown";
+      lines.push(`| ${roleA} vs ${roleB} | ${ec.topic || "—"} |`);
+    }
+    lines.push("");
+  }
+
+  // North Star
+  if (draft.northStar) {
+    lines.push("## North Star");
+    lines.push("");
+    lines.push(draft.northStar);
+    lines.push("");
+  }
+
+  // Grill results summary
+  const answered = draft.grillQuestions.filter((q) => q.status === "answered").length;
+  const acknowledged = draft.grillQuestions.filter((q) => q.status === "acknowledged").length;
+  const remaining = draft.grillQuestions.filter((q) => q.status === "unanswered").length;
+
+  lines.push("## Grill Results Summary");
+  lines.push("");
+  lines.push(`- Questions Answered: ${answered}`);
+  lines.push(`- Questions Acknowledged: ${acknowledged}`);
+  lines.push(`- Questions Remaining: ${remaining}`);
+  lines.push("");
+
+  // Individual personas
+  lines.push("## Individual Personas");
+  lines.push("");
+
+  const context: ProjectContext = {
+    projectName: draft.projectName,
+    description: draft.description,
+    targetUser: draft.targetUser,
+    problem: draft.problem,
+  };
+
+  draft.personas.forEach((p, i) => {
+    lines.push(`### ${p.role}${p.company ? ` (modeled after ${p.company})` : ""}`);
+    lines.push("");
+    lines.push(`**Focus:** ${p.focus || "General"}`);
+    lines.push(`**Confidence:** ${p.confidence}`);
+    lines.push(`**Triggers:** ${p.triggers.length > 0 ? p.triggers.join(", ") : "None"}`);
+    lines.push("");
+    lines.push("```");
+    lines.push(getPersonaPrompt(p, context));
+    lines.push("```");
+    lines.push("");
+    if (i < draft.personas.length - 1) {
+      lines.push("---");
+      lines.push("");
+    }
+  });
+
+  return lines.join("\n");
+}
+
+/* --------------- JSON Export --------------- */
+
+export function studioToExportJson(draft: StudioDraft): string {
+  const context: ProjectContext = {
+    projectName: draft.projectName,
+    description: draft.description,
+    targetUser: draft.targetUser,
+    problem: draft.problem,
+  };
+
+  const ceoIndex = draft.personas.findIndex((p) => p.isCeo);
+
+  const payload = {
+    format: "persona-studio-team",
+    version: "1.0",
+    project: {
+      name: draft.projectName,
+      description: draft.description,
+      targetUser: draft.targetUser,
+      problem: draft.problem,
+    },
+    team: draft.personas.map((p) => ({
+      role: p.role,
+      company: p.company,
+      focus: p.focus,
+      confidence: p.confidence,
+      isCeo: p.isCeo,
+      triggers: p.triggers,
+      systemPrompt: getPersonaPrompt(p, context),
+      promptOverride: p.promptOverride,
+    })),
+    consensus: {
+      threshold: draft.consensusThreshold,
+      ceoIndex: ceoIndex >= 0 ? ceoIndex : null,
+    },
+    phaseAuthority: draft.phaseAuthority.map((pa) => ({
+      phase: pa.phase,
+      phaseName: PROJECT_PHASES.find((p) => p.index === pa.phase)?.name ?? `Phase ${pa.phase}`,
+      personaIndex: pa.personaIndex,
+      personaRole: draft.personas[pa.personaIndex]?.role ?? "Unknown",
+    })),
+    expectedConflicts: draft.expectedConflicts.map((ec) => ({
+      between: [
+        draft.personas[ec.betweenIndices[0]]?.role ?? "Unknown",
+        draft.personas[ec.betweenIndices[1]]?.role ?? "Unknown",
+      ],
+      betweenIndices: ec.betweenIndices,
+      topic: ec.topic,
+    })),
+    northStar: draft.northStar,
+    grillResults: draft.grillQuestions.map((q) => ({
+      personaRole: draft.personas[q.personaIndex]?.role ?? "Unknown",
+      question: q.question,
+      response: q.response,
+      status: q.status,
+    })),
+    generated: new Date().toISOString(),
+  };
+
+  return JSON.stringify(payload, null, 2);
 }
 
 /* --------------- Utilities --------------- */

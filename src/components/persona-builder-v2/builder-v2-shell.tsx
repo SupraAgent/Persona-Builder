@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StepContext } from "./step-context";
 import { StepMembers } from "./step-members";
 import { StepDynamics } from "./step-dynamics";
+import { StepGrill } from "./step-grill";
 import { StepReview } from "./step-review";
 import { EMPTY_TEAM_DRAFT, type PersonaTeamDraft } from "@/lib/persona-builder-v2";
 
@@ -13,6 +14,7 @@ const STEPS = [
   { label: "Context" },
   { label: "Members" },
   { label: "Dynamics" },
+  { label: "Grill" },
   { label: "Review" },
 ];
 
@@ -20,6 +22,7 @@ export function BuilderV2Shell() {
   const [step, setStep] = React.useState(0);
   const [draft, setDraft] = React.useState<PersonaTeamDraft>(EMPTY_TEAM_DRAFT);
   const [direction, setDirection] = React.useState(1);
+  const [grillSkipped, setGrillSkipped] = React.useState(false);
 
   function patchDraft(patch: Partial<PersonaTeamDraft>) {
     setDraft((prev) => ({ ...prev, ...patch }));
@@ -49,12 +52,14 @@ export function BuilderV2Shell() {
       ? Boolean(draft.teamName)
       : step === 1
         ? draft.members.length > 0
-        : true;
+        : step === 3
+          ? grillSkipped || draft.grillQuestions.every((q) => q.status !== "unanswered")
+          : true;
 
   const isLastStep = step === STEPS.length - 1;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className={`mx-auto px-4 py-8 ${step === 1 ? "max-w-4xl" : "max-w-2xl"}`}>
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -127,7 +132,18 @@ export function BuilderV2Shell() {
           {step === 0 && <StepContext draft={draft} onChange={patchDraft} />}
           {step === 1 && <StepMembers draft={draft} onChange={patchDraft} />}
           {step === 2 && <StepDynamics draft={draft} onChange={patchDraft} />}
-          {step === 3 && <StepReview draft={draft} />}
+          {step === 3 && (
+            <StepGrill
+              draft={draft}
+              onChange={patchDraft}
+              onSkip={() => {
+                setGrillSkipped(true);
+                setDirection(1);
+                setStep(4);
+              }}
+            />
+          )}
+          {step === 4 && <StepReview draft={draft} />}
         </motion.div>
       </AnimatePresence>
 

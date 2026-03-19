@@ -23,11 +23,19 @@ export type TeamDynamics = {
   ceoTiebreakerId: string | null;
 };
 
+export type GrillQuestion = {
+  memberId: string;
+  question: string;
+  response: string;
+  status: "unanswered" | "answered" | "acknowledged";
+};
+
 export type PersonaTeamDraft = {
   teamName: string;
   projectContext: string;
   members: TeamMember[];
   dynamics: TeamDynamics;
+  grillQuestions: GrillQuestion[];
 };
 
 export const EMPTY_TEAM_DRAFT: PersonaTeamDraft = {
@@ -39,6 +47,7 @@ export const EMPTY_TEAM_DRAFT: PersonaTeamDraft = {
     consensusThreshold: 0.67,
     ceoTiebreakerId: null,
   },
+  grillQuestions: [],
 };
 
 let memberCounter = 0;
@@ -149,6 +158,91 @@ export function generateTeamMd(team: PersonaTeamDraft): string {
     lines.push("```");
     lines.push("");
   });
+
+  return lines.join("\n");
+}
+
+export function generateTeamJson(draft: PersonaTeamDraft): string {
+  const data = {
+    format: "persona-builder-team",
+    version: "2.0",
+    teamName: draft.teamName || "Untitled Team",
+    projectContext: draft.projectContext || "",
+    members: draft.members.map((m) => ({
+      name: m.draft.name || "",
+      role: m.agentRole?.title || m.draft.title || "",
+      company: m.draft.company || "",
+      communicationStyle: m.communicationStyle?.label || "",
+      skills: m.skills,
+      llmProvider: m.llmProvider,
+      llmModel: m.llmModel,
+      phaseAuthority: m.phaseAuthority,
+      systemPrompt: generateSystemPrompt(m.draft),
+    })),
+    dynamics: {
+      consensusThreshold: draft.dynamics.consensusThreshold,
+      ceoTiebreakerId: draft.dynamics.ceoTiebreakerId,
+      expectedConflicts: draft.dynamics.expectedConflicts.map((c) => {
+        const a = draft.members.find((m) => m.id === c.betweenIds[0]);
+        const b = draft.members.find((m) => m.id === c.betweenIds[1]);
+        return {
+          between: [a?.draft.name || "?", b?.draft.name || "?"],
+          topic: c.topic,
+        };
+      }),
+    },
+    generated: new Date().toISOString(),
+  };
+  return JSON.stringify(data, null, 2);
+}
+
+export function generateMemberMarkdown(member: TeamMember, teamName: string): string {
+  const name = member.draft.name || "Unnamed";
+  const role = member.agentRole?.title || member.draft.title || "Agent";
+  const company = member.draft.company || "—";
+  const style = member.communicationStyle?.label || "—";
+  const provider = member.llmProvider || "—";
+  const model = member.llmModel || "—";
+  const generated = new Date().toISOString();
+
+  const lines: string[] = [];
+
+  lines.push("---");
+  lines.push(`name: ${name}`);
+  lines.push(`role: ${role}`);
+  lines.push(`company: ${company}`);
+  lines.push(`team: ${teamName || "Untitled Team"}`);
+  lines.push(`generated: ${generated}`);
+  lines.push("---");
+  lines.push("");
+  lines.push(`# ${name} — ${role}`);
+  lines.push("");
+  lines.push("## Identity");
+  lines.push(`- **Company:** ${company}`);
+  lines.push(`- **Communication Style:** ${style}`);
+  lines.push(`- **LLM:** ${provider} / ${model}`);
+  lines.push("");
+  lines.push("## Skills");
+  if (member.skills.length > 0) {
+    member.skills.forEach((s) => lines.push(`- ${s}`));
+  } else {
+    lines.push("- (none specified)");
+  }
+  lines.push("");
+  lines.push("## Phase Authority");
+  if (member.phaseAuthority.length > 0) {
+    member.phaseAuthority.forEach((p) => {
+      lines.push(`- ${PHASE_LABELS[p] || `Phase ${p}`}`);
+    });
+  } else {
+    lines.push("- (none assigned)");
+  }
+  lines.push("");
+  lines.push("## System Prompt");
+  lines.push("");
+  lines.push("```");
+  lines.push(generateSystemPrompt(member.draft));
+  lines.push("```");
 
   return lines.join("\n");
 }

@@ -58,6 +58,7 @@ export const EMPTY_LAUNCH_KIT_V2: LaunchKitV2Draft = {
   },
   grillQuestions: [],
   grillCompleted: false,
+  grillSkipped: false,
   deployTarget: "web_ios_android",
   techChoices: [...DEFAULT_TECH_CHOICES],
   mobileFramework: "React Native / Expo",

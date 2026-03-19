@@ -14,6 +14,7 @@ import {
   type PersonaTeamDraft,
   type TeamMember,
 } from "@/lib/persona-builder-v2";
+import { generateSystemPrompt } from "@/lib/persona-builder";
 
 type Props = {
   draft: PersonaTeamDraft;
@@ -66,8 +67,11 @@ export function StepMembers({ draft, onChange }: Props) {
     if (members.length > 0) setExpandedId(members[0].id);
   }
 
+  const activeMember = draft.members.find((m) => m.id === expandedId) || null;
+
   return (
-    <div className="space-y-6">
+    <div className="flex gap-6">
+    <div className="flex-1 min-w-0 space-y-6">
       <div>
         <h2 className="text-lg font-semibold text-foreground">Team Members</h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -237,6 +241,17 @@ export function StepMembers({ draft, onChange }: Props) {
       <Button variant="ghost" size="sm" onClick={addMember} className="text-xs">
         + Add team member
       </Button>
+    </div>
+
+    {/* Right side: Prompt Preview */}
+    <div className="hidden lg:block lg:w-80 shrink-0">
+      <div className="sticky top-8 rounded-xl border border-white/10 bg-black/30 p-4">
+        <h3 className="text-sm font-semibold text-white/70 mb-2">Prompt Preview</h3>
+        <pre className="text-xs text-white/50 whitespace-pre-wrap max-h-96 overflow-y-auto">
+          {activeMember ? generateSystemPrompt(activeMember.draft) : "Select a member to preview their prompt"}
+        </pre>
+      </div>
+    </div>
     </div>
   );
 }

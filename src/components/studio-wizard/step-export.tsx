@@ -2,10 +2,14 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   getPersonaPrompt,
   generateExportFile,
   generateConsensusBlock,
+  generateStudioTeamMd,
+  generateStudioNorthStar,
+  studioToExportJson,
   inferRoleIcon,
   slugify,
   type StudioDraft,
@@ -13,9 +17,10 @@ import {
 
 type Props = {
   draft: StudioDraft;
+  onChange: (patch: Partial<StudioDraft>) => void;
 };
 
-export function StepExport({ draft }: Props) {
+export function StepExport({ draft, onChange }: Props) {
   const [copied, setCopied] = React.useState<number | null>(null);
   const [saving, setSaving] = React.useState(false);
   const [saved, setSaved] = React.useState(0);
@@ -57,6 +62,17 @@ export function StepExport({ draft }: Props) {
       const consensus = generateConsensusBlock(draft);
       download(consensus, `${slug}-consensus.md`, "text/markdown");
     }, draft.personas.length * 200);
+  }
+
+  function downloadTeamMd() {
+    const content = generateStudioTeamMd(draft);
+    download(content, "team.md", "text/markdown");
+  }
+
+  function downloadJson() {
+    const content = studioToExportJson(draft);
+    const slug = slugify(draft.projectName);
+    download(content, `${slug}-team.json`, "application/json");
   }
 
   async function saveAll() {
@@ -107,6 +123,26 @@ export function StepExport({ draft }: Props) {
           Each advisor&apos;s prompt is a standalone file you can use in any AI tool —
           Claude, ChatGPT, Cursor, or anything else.
         </p>
+      </div>
+
+      {/* North Star */}
+      <div className="rounded-xl border border-white/10 bg-black/30 p-4 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-white/70">North Star</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onChange({ northStar: generateStudioNorthStar(draft) })}
+          >
+            Generate
+          </Button>
+        </div>
+        <Textarea
+          value={draft.northStar}
+          onChange={(e) => onChange({ northStar: e.target.value })}
+          placeholder="Team mission statement..."
+          className="bg-white/5 border-white/10 text-sm"
+        />
       </div>
 
       {/* Per-persona export cards */}
@@ -212,6 +248,12 @@ export function StepExport({ draft }: Props) {
       <div className="flex items-center gap-3 pt-2">
         <Button onClick={downloadAll} variant="secondary">
           Export All
+        </Button>
+        <Button onClick={downloadTeamMd} variant="secondary">
+          Download team.md
+        </Button>
+        <Button onClick={downloadJson} variant="secondary">
+          Download JSON
         </Button>
         <Button
           onClick={saveAll}

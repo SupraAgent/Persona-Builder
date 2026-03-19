@@ -6,11 +6,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import {
   SKILL_TARGETS,
+  exportChecklistToJson,
+  exportChecklistToMarkdown,
   type SkillTarget,
   type ChecklistItem,
   type AutoresearchLoopResult,
   type AutoresearchRound,
 } from "@/lib/auto-research";
+
+const MODEL_BADGES: Record<string, string> = {
+  "claude-sonnet-4-6": "Recommended",
+  "claude-haiku-4-5": "Fast",
+  "claude-opus-4-6": "Deepest",
+};
 
 export function ChecklistPanel() {
   const [backend, setBackend] = React.useState<"anthropic" | "ollama">("anthropic");
@@ -21,6 +29,37 @@ export function ChecklistPanel() {
   const [result, setResult] = React.useState<AutoresearchLoopResult | null>(null);
   const [rounds, setRounds] = React.useState<AutoresearchRound[]>([]);
   const [error, setError] = React.useState<string | null>(null);
+  const [showHistory, setShowHistory] = React.useState(false);
+  const [checklistHistory, setChecklistHistory] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    try {
+      setChecklistHistory(JSON.parse(localStorage.getItem("checklist-history") || "[]"));
+    } catch {
+      setChecklistHistory([]);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (result) {
+      try {
+        const hist = JSON.parse(localStorage.getItem("checklist-history") || "[]");
+        hist.unshift({
+          id: Date.now(),
+          timestamp: new Date().toISOString(),
+          skillTarget: selectedTarget?.label || "",
+          score: result.score,
+          passedCount: result.results.filter((r: any) => r.passed).length,
+          totalCount: result.results.length,
+        });
+        const trimmed = hist.slice(0, 20);
+        localStorage.setItem("checklist-history", JSON.stringify(trimmed));
+        setChecklistHistory(trimmed);
+      } catch {
+        // localStorage unavailable (private browsing)
+      }
+    }
+  }, [result]);
 
   async function runScoring() {
     if (!selectedTarget || !outputToScore) return;
@@ -95,15 +134,27 @@ export function ChecklistPanel() {
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Model</label>
           {backend === "anthropic" ? (
             <div className="flex gap-2">
-              {["claude-sonnet-4-6", "claude-haiku-4-5", "claude-opus-4-6"].map((m) => (
-                <button key={m} type="button" onClick={() => setModel(m)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
-                    model === m ? "border-primary/60 bg-primary/10 text-primary" : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20"
-                  }`}
-                >
-                  {m.replace("claude-", "").replace("-4-6", " 4.6").replace("-4-5", " 4.5")}
-                </button>
-              ))}
+              {(["claude-sonnet-4-6", "claude-haiku-4-5", "claude-opus-4-6"] as const).map((m) => {
+                const badgeLabel = MODEL_BADGES[m];
+                return (
+                  <button key={m} type="button" onClick={() => setModel(m)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                      model === m ? "border-primary/60 bg-primary/10 text-primary" : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20"
+                    }`}
+                  >
+                    {m.replace("claude-", "").replace("-4-6", " 4.6").replace("-4-5", " 4.5")}
+                    {badgeLabel && (
+                      <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${
+                        badgeLabel === "Recommended" ? "bg-green-500/20 text-green-400" :
+                        badgeLabel === "Fast" ? "bg-blue-500/20 text-blue-400" :
+                        "bg-purple-500/20 text-purple-400"
+                      }`}>
+                        {badgeLabel}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -204,71 +255,195 @@ export function ChecklistPanel() {
 
       {/* Results */}
       {result && (
-        <div className="space-y-6 border-t border-white/10 pt-6">
-          {/* Score */}
-          <div className="flex items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02]">
-              <span className={`text-3xl font-bold ${result.score >= 80 ? "text-green-400" : result.score >= 60 ? "text-yellow-400" : "text-red-400"}`}>
-                {result.score}%
-              </span>
-            </div>
-            <div>
-              <div className="text-lg font-semibold text-foreground">Checklist Score</div>
-              <div className="text-sm text-muted-foreground">
-                {result.results.filter((r) => r.passed).length}/{result.results.length} checks passed
-              </div>
-            </div>
-          </div>
+        <ChecklistResults result={result} rounds={rounds} />
+      )}
 
-          {/* Per-check results */}
-          <div className="space-y-1.5">
-            {result.results.map((r, i) => (
-              <div key={i} className={`flex items-start gap-2 rounded-lg border p-2.5 ${
-                r.passed ? "border-green-500/20 bg-green-500/[0.03]" : "border-red-500/20 bg-red-500/[0.03]"
-              }`}>
-                <span className={`text-sm mt-0.5 ${r.passed ? "text-green-400" : "text-red-400"}`}>
-                  {r.passed ? "\u2713" : "\u2717"}
+      {/* Checklist History */}
+      <div className="mt-6">
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="text-sm text-white/50 hover:text-white/70 flex items-center gap-1"
+        >
+          {showHistory ? "\u25BC" : "\u25B6"} Score History ({checklistHistory.length} runs)
+        </button>
+        {showHistory && (
+          <div className="mt-2 space-y-1">
+            {checklistHistory.map((h: any) => (
+              <div key={h.id} className="flex items-center justify-between text-xs text-white/40 py-1 border-b border-white/5">
+                <span>{new Date(h.timestamp).toLocaleDateString()}</span>
+                <span>{h.skillTarget}</span>
+                <span className={`font-mono ${h.score >= 80 ? "text-green-400" : h.score >= 60 ? "text-yellow-400" : "text-red-400"}`}>
+                  {h.score}%
                 </span>
-                <span className="text-xs text-foreground flex-1">{r.question}</span>
               </div>
             ))}
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-          {/* Suggested improvement */}
-          {result.suggestedChange && result.failedItems.length > 0 && (
-            <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
-              <div className="text-sm font-medium text-blue-400 mb-1">Suggested Change (ONE)</div>
-              <div className="text-xs text-foreground">{result.suggestedChange}</div>
-              <p className="mt-2 text-[10px] text-muted-foreground">
-                Apply this change to your skill, paste the new output, and re-score to see if it improves.
-              </p>
-            </div>
-          )}
+function ChecklistResults({
+  result,
+  rounds,
+}: {
+  result: AutoresearchLoopResult;
+  rounds: AutoresearchRound[];
+}) {
+  const [copied, setCopied] = React.useState(false);
+  const [copiedSuggestion, setCopiedSuggestion] = React.useState(false);
+  const passed = result.results.filter((r) => r.passed).length;
+  const total = result.results.length;
 
-          {/* Round history */}
-          {rounds.length > 1 && (
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Round History</h3>
-              <div className="space-y-1">
-                {rounds.map((r) => (
-                  <div key={r.round} className="flex items-center gap-3 text-xs">
-                    <span className="text-muted-foreground w-16">Round {r.round}</span>
-                    <span className={`font-medium ${r.newScore >= 80 ? "text-green-400" : r.newScore >= 60 ? "text-yellow-400" : "text-red-400"}`}>
-                      {r.newScore}%
-                    </span>
-                    {r.round > 1 && (
-                      <span className={r.newScore > r.previousScore ? "text-green-400" : r.newScore < r.previousScore ? "text-red-400" : "text-muted-foreground"}>
-                        ({r.newScore > r.previousScore ? "+" : ""}{r.newScore - r.previousScore}%)
-                      </span>
-                    )}
-                    <span className="text-muted-foreground">{r.changeDescription}</span>
-                  </div>
-                ))}
-              </div>
+  function downloadFile(content: string, filename: string, type: string) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleDownloadJson() {
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    downloadFile(exportChecklistToJson(result), `checklist-report-${ts}.json`, "application/json");
+  }
+
+  function handleDownloadMarkdown() {
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    downloadFile(exportChecklistToMarkdown(result), `checklist-report-${ts}.md`, "text/markdown");
+  }
+
+  function handleCopyScore() {
+    const text = `Score: ${result.score}% (${passed}/${total} passed)`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="space-y-6 border-t border-white/10 pt-6">
+      {/* Score */}
+      <div className="flex items-center gap-4">
+        <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.02]">
+          <span
+            className={`text-3xl font-bold ${
+              result.score >= 80
+                ? "text-green-400"
+                : result.score >= 60
+                  ? "text-yellow-400"
+                  : result.score >= 40
+                    ? "text-orange-400"
+                    : "text-red-400"
+            }`}
+          >
+            {result.score}%
+          </span>
+        </div>
+        <div>
+          <div className="text-lg font-semibold text-foreground">Checklist Score</div>
+          <div className="text-sm text-muted-foreground">
+            {passed}/{total} checks passed
+          </div>
+        </div>
+      </div>
+
+      {/* Results Table */}
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-3">Results</h3>
+        <div className="space-y-1">
+          {result.results.map((r, i) => (
+            <div
+              key={r.itemId}
+              className={`flex items-start gap-2 rounded-lg px-3 py-2 text-xs ${
+                r.passed
+                  ? "bg-green-500/5 border border-green-500/20"
+                  : "bg-red-500/5 border border-red-500/20"
+              }`}
+            >
+              <span
+                className={`font-medium ${r.passed ? "text-green-400" : "text-red-400"}`}
+              >
+                {r.passed ? "PASS" : "FAIL"}
+              </span>
+              <span className="text-foreground flex-1">{r.question}</span>
             </div>
-          )}
+          ))}
+        </div>
+      </div>
+
+      {/* Suggested Change */}
+      {result.suggestedChange && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-foreground">Suggested Change</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(result.suggestedChange);
+                setCopiedSuggestion(true);
+                setTimeout(() => setCopiedSuggestion(false), 2000);
+              }}
+            >
+              {copiedSuggestion ? "Copied!" : "Copy"}
+            </Button>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-xs text-muted-foreground">
+            {result.suggestedChange}
+          </div>
         </div>
       )}
+
+      {/* Rounds History */}
+      {rounds.length > 1 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-2">Score History</h3>
+          <div className="space-y-1">
+            {rounds.map((r) => (
+              <div
+                key={r.round}
+                className="flex items-center gap-3 text-xs text-muted-foreground"
+              >
+                <span className="w-16">Round {r.round}</span>
+                <span className="font-medium text-foreground">{r.newScore}%</span>
+                {r.round > 1 && (
+                  <span
+                    className={
+                      r.newScore > r.previousScore
+                        ? "text-green-400"
+                        : r.newScore < r.previousScore
+                          ? "text-red-400"
+                          : "text-muted-foreground"
+                    }
+                  >
+                    {r.newScore > r.previousScore ? "+" : ""}
+                    {r.newScore - r.previousScore}%
+                  </span>
+                )}
+                <span>{r.changeDescription}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Export Bar */}
+      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+        <span className="text-xs font-medium text-muted-foreground mr-auto">Export</span>
+        <Button variant="outline" size="sm" onClick={handleDownloadJson}>
+          Download JSON
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleDownloadMarkdown}>
+          Download Report
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleCopyScore}>
+          {copied ? "Copied!" : "Copy Score"}
+        </Button>
+      </div>
     </div>
   );
 }

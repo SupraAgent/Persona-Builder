@@ -493,3 +493,158 @@ function fallbackScorecard(name: string): PersonaScorecard {
     improvements: [],
   };
 }
+
+// ---- Export Functions ----
+
+export function exportResearchToJson(result: AutoResearchResult): string {
+  return JSON.stringify(result, null, 2);
+}
+
+export function exportResearchToMarkdown(result: AutoResearchResult): string {
+  const lines: string[] = [];
+
+  lines.push(`# Team Evaluation Report`);
+  lines.push("");
+  lines.push(`**Team Score: ${result.teamScore}/100**`);
+  lines.push(`**Evaluated:** ${result.scorecards.length} personas`);
+  lines.push(`**Date:** ${result.timestamp}`);
+  lines.push("");
+
+  // Scorecard table
+  lines.push("## Persona Scorecards");
+  lines.push("");
+  lines.push("| Name | Relevance | Specificity | Coverage | Differentiation | Actionability | Overall |");
+  lines.push("|------|-----------|-------------|----------|-----------------|---------------|---------|");
+  for (const card of result.scorecards) {
+    lines.push(
+      `| ${card.personaName} | ${card.scores.relevance} | ${card.scores.specificity} | ${card.scores.coverage} | ${card.scores.differentiation} | ${card.scores.actionability} | **${card.overall}** |`
+    );
+  }
+  lines.push("");
+
+  // Per-persona details
+  for (const card of result.scorecards) {
+    lines.push(`### ${card.personaName} (${card.overall}/100)`);
+    lines.push("");
+    if (card.strengths.length > 0) {
+      lines.push("**Strengths:**");
+      for (const s of card.strengths) {
+        lines.push(`- ${s}`);
+      }
+      lines.push("");
+    }
+    if (card.weaknesses.length > 0) {
+      lines.push("**Weaknesses:**");
+      for (const w of card.weaknesses) {
+        lines.push(`- ${w}`);
+      }
+      lines.push("");
+    }
+    if (card.improvements.length > 0) {
+      lines.push("**Improvements:**");
+      for (const imp of card.improvements) {
+        lines.push(`- ${imp}`);
+      }
+      lines.push("");
+    }
+  }
+
+  // Gaps
+  if (result.gaps.length > 0) {
+    lines.push("## Gaps");
+    lines.push("");
+    for (const gap of result.gaps) {
+      const badge =
+        gap.severity === "critical"
+          ? "🔴 CRITICAL"
+          : gap.severity === "moderate"
+            ? "🟡 MODERATE"
+            : "🔵 MINOR";
+      lines.push(`- **${badge} — ${gap.area}:** ${gap.suggestion}`);
+    }
+    lines.push("");
+  }
+
+  // Consensus simulation
+  if (result.consensusSimulation) {
+    const sim = result.consensusSimulation;
+    lines.push("## Consensus Simulation");
+    lines.push("");
+    lines.push(`**Decision:** ${sim.decision}`);
+    lines.push("");
+    for (const vote of sim.votes) {
+      lines.push(`- **${vote.personaName}** (${vote.confidence}): ${vote.position}`);
+      lines.push(`  > ${vote.reasoning}`);
+    }
+    lines.push("");
+    lines.push(`**Outcome:** ${sim.outcome}`);
+    if (sim.insights.length > 0) {
+      lines.push("");
+      lines.push("**Insights:**");
+      for (const insight of sim.insights) {
+        lines.push(`- ${insight}`);
+      }
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+export function exportResearchToCsv(result: AutoResearchResult): string {
+  const rows: string[] = [];
+  rows.push("Name,Relevance,Specificity,Coverage,Differentiation,Actionability,Overall");
+  for (const card of result.scorecards) {
+    rows.push(
+      `${card.personaName},${card.scores.relevance},${card.scores.specificity},${card.scores.coverage},${card.scores.differentiation},${card.scores.actionability},${card.overall}`
+    );
+  }
+  return rows.join("\n");
+}
+
+export function exportChecklistToJson(result: AutoresearchLoopResult): string {
+  return JSON.stringify(result, null, 2);
+}
+
+export function exportChecklistToMarkdown(result: AutoresearchLoopResult): string {
+  const lines: string[] = [];
+  const passed = result.results.filter((r) => r.passed).length;
+  const total = result.results.length;
+
+  lines.push("# Checklist Scoring Report");
+  lines.push("");
+  lines.push(`**Score: ${result.score}%** (${passed}/${total} passed)`);
+  lines.push(`**Skill Target:** ${result.skillTargetId}`);
+  lines.push("");
+
+  // Pass/fail table
+  lines.push("## Results");
+  lines.push("");
+  lines.push("| # | Status | Question |");
+  lines.push("|---|--------|----------|");
+  result.results.forEach((r, i) => {
+    const status = r.passed ? "PASS" : "FAIL";
+    lines.push(`| ${i + 1} | ${status} | ${r.question} |`);
+  });
+  lines.push("");
+
+  // Failed items
+  if (result.failedItems.length > 0) {
+    lines.push("## Failed Items");
+    lines.push("");
+    for (const item of result.failedItems) {
+      lines.push(`- ${item}`);
+    }
+    lines.push("");
+  }
+
+  // Suggested change
+  if (result.suggestedChange) {
+    lines.push("## Suggested Change");
+    lines.push("");
+    lines.push(result.suggestedChange);
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
