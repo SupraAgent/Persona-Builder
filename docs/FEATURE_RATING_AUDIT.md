@@ -264,3 +264,322 @@
 | **Launch Kit** (merged v1+v2) | Full project setup from brief to CLAUDE.md |
 | **VibeCode** | Quick project scaffolding with coding philosophy |
 | **Auto-Research** | Quality scoring and continuous improvement |
+
+---
+
+## Enhancement Plans: Raising the Top 4 Above 85
+
+### Persona Studio — Current: 85.0 → Target: 91.0
+
+**Weak categories to fix:**
+
+| Category | Current | Target | Delta | What to Pull In |
+|----------|:-------:|:------:|:-----:|-----------------|
+| Integration | 78 | 90 | +12 | From Team Builder: team.md generation; add `/api/teams` endpoint for full team save |
+| Output Versatility | 82 | 92 | +10 | From Unified Builder: JSON export format; add team-level JSON download |
+| Scalability | 80 | 90 | +10 | From Team Builder: phase authority assignments + expected conflict modeling |
+| Ease of Use | 85 | 88 | +3 | From Unified Builder: North Star auto-generation field in export step |
+| Functionality | 88 | 92 | +4 | From Agent Builder: LLM provider/model selection per persona; skills/capabilities declaration |
+
+**Specific enhancements:**
+
+1. **Add team.md export** (Integration +6)
+   - Source: `persona-builder-v2.ts` → `generateTeamMd()` (lines 90-154)
+   - Adapt to use `StudioDraft` structure instead of `PersonaTeamDraft`
+   - Add "Download team.md" button to StepExport
+
+2. **Add `/api/teams` endpoint + team-level DB save** (Integration +6)
+   - New endpoint: POST `/api/teams` accepting full team structure (personas + consensus + grill results)
+   - Add "Save Team" button alongside existing per-persona save
+   - Persist consensus rules, CEO tiebreaker, confidence levels as team metadata
+
+3. **Add JSON export** (Output Versatility +5)
+   - Source: `unified-builder.ts` → `unifiedToExportJson()` pattern
+   - Create `studioToExportJson()` that outputs full team structure as JSON
+   - Add "Download JSON" button to StepExport
+
+4. **Add North Star field** (Output Versatility +5, Ease of Use +3)
+   - Source: `unified-wizard/step-review.tsx` → North Star textarea + `generateNorthStar()`
+   - Add to StepExport as editable team mission statement
+   - Auto-generate from project context + team roles
+
+5. **Add phase authority** (Scalability +5)
+   - Source: `persona-builder-v2/step-dynamics.tsx` → phase authority UI (lines 117-151)
+   - Add as optional section in StepTeam: assign each persona a lead phase (1.5x voting weight)
+   - Include in team.md and JSON exports
+
+6. **Add expected conflict modeling** (Scalability +5)
+   - Source: `persona-builder-v2/step-dynamics.tsx` → conflict registry (lines 183-242)
+   - Add as collapsible section in StepTeam: define persona pairs + conflict topics
+   - Feed into grill questions for targeted interrogation
+
+7. **Add LLM provider/model per persona** (Functionality +2)
+   - Source: `unified-wizard/step-capabilities.tsx` → provider/model selection (lines 96-151)
+   - Add optional LLM assignment dropdown per persona card in StepTeam
+   - Include in system prompt and exports
+
+8. **Add skills/capabilities declaration** (Functionality +2)
+   - Source: `unified-wizard/step-capabilities.tsx` → skill multi-select (lines 54-94)
+   - Add optional capabilities per persona (code_review, deploy, security_audit, etc.)
+   - Display as badges in export cards
+
+**Projected scores after enhancement:**
+
+| Category | Before | After | Change |
+|----------|:------:|:-----:|:------:|
+| Ease of Use | 85 | 88 | +3 |
+| Functionality | 88 | 92 | +4 |
+| Best Result | 92 | 94 | +2 |
+| Uniqueness | 90 | 90 | — |
+| Not Redundant | 85 | 85 | — |
+| Output Versatility | 82 | 92 | +10 |
+| Integration | 78 | 90 | +12 |
+| Scalability | 80 | 90 | +10 |
+| **AVG** | **85.0** | **91.0** | **+6.0** |
+
+---
+
+### Launch Kit v1 — Current: 83.8 → Target: 89.5
+
+**Weak categories to fix:**
+
+| Category | Current | Target | Delta | What to Pull In |
+|----------|:-------:|:------:|:-----:|-----------------|
+| Ease of Use | 65 | 80 | +15 | Merge/condense steps; make grill + whitepaper optional |
+| Scalability | 70 | 85 | +15 | Cap grill questions; add orchestrator config from v2 |
+| Functionality | 95 | 97 | +2 | From Launch Kit v2: agent orchestrator config step |
+| Best Result | 90 | 95 | +5 | From v2: CLAUDE.md generation; from VibeCode: scaffold commands |
+
+**Specific enhancements:**
+
+1. **Merge steps to reduce wizard length: 8 → 6 steps** (Ease of Use +8)
+   - Merge Brief + Stack → "Project Setup" (context + tech choices in one view)
+   - Merge Whitepaper + Review → "Export" (whitepaper becomes one export option, not a step)
+   - New flow: Brief+Stack → Team → Consensus → Grill → Roadmap → Export
+   - Make Grill step skippable with "Skip — I'll validate later" button
+
+2. **Cap grill questions at scale** (Scalability +5, Ease of Use +4)
+   - Limit to 2 questions per persona (instead of 3) when team > 5 members
+   - Add "Most Critical" tag to top 5 questions; allow skipping the rest
+   - Add progress indicator: "Answered 8/12 questions"
+
+3. **Add agent orchestrator config from v2** (Functionality +2, Best Result +2)
+   - Source: `launch-v2/step-orchestrator.tsx` → orchestrator model, max concurrent agents, toggles
+   - Source: `launch-kit-v2.ts` → `AgentOrchestratorConfig` type (lines 34-41)
+   - Add as optional section in the Consensus step (since it's related to team governance)
+   - Fields: orchestrator model, max concurrent agents, auto-consult on PR, auto-consult on deploy, weekly retros
+
+4. **Add CLAUDE.md generation** (Best Result +3, Scalability +5)
+   - Source: `launch-kit-v2.ts` → `generateClaudeMd()` (lines 85-154)
+   - Add as primary export in the final Export step
+   - Combine: project brief + tech stack + team roster + orchestrator config + roadmap + north star
+   - Make this the "one file to rule them all" output alongside individual exports
+
+5. **Add VibeCode scaffold command** (Scalability +5)
+   - Source: `vibecode.ts` → `generateScaffoldCommand()` and `VIBECODE_FRAMEWORKS`
+   - When tech stack includes a known framework (Next.js, React Vite, etc.), auto-generate scaffold command
+   - Display in Export step: "Run this to scaffold your project"
+
+6. **Add coding vibe/principles from VibeCode** (Best Result +2)
+   - Source: `vibecode.ts` → `VIBECODE_STYLES` (Move Fast, Production Grade, etc.)
+   - Add optional vibe selector in the Stack step
+   - Embed selected principles in CLAUDE.md output
+
+**Projected scores after enhancement:**
+
+| Category | Before | After | Change |
+|----------|:------:|:-----:|:------:|
+| Ease of Use | 65 | 80 | +15 |
+| Functionality | 95 | 97 | +2 |
+| Best Result | 90 | 95 | +5 |
+| Uniqueness | 85 | 88 | +3 |
+| Not Redundant | 80 | 85 | +5 |
+| Output Versatility | 95 | 97 | +2 |
+| Integration | 90 | 92 | +2 |
+| Scalability | 70 | 85 | +15 |
+| **AVG** | **83.8** | **89.9** | **+6.1** |
+
+---
+
+### Auto-Research — Current: 81.9 → Target: 89.3
+
+**Weak categories to fix:**
+
+| Category | Current | Target | Delta | What to Pull In |
+|----------|:-------:|:------:|:-----:|-----------------|
+| Ease of Use | 70 | 85 | +15 | Auto-import personas from library; add context templates; model recommendations |
+| Output Versatility | 60 | 88 | +28 | Add JSON/Markdown/CSV export; add localStorage persistence; add score history |
+| Scalability | 75 | 88 | +13 | Add request queue with progress; custom checklist editor; batch scoring |
+| Integration | 82 | 90 | +8 | Auto-load from `/api/personas`; link suggestions to source skill files |
+
+**Specific enhancements:**
+
+1. **Auto-import personas from library** (Ease of Use +8, Integration +5)
+   - Add "Load from Library" button in ResearchPanel
+   - Call GET `/api/personas` to fetch user's saved personas
+   - Auto-populate name, role, company, system_prompt fields
+   - Add "Load from team.md" option: paste team.md, auto-parse persona blocks
+
+2. **Add project context template** (Ease of Use +3)
+   - Replace freeform textarea with structured fields: target user, problem, success metric, comparables
+   - Add validation that all fields are filled before scoring
+   - Show tooltip: "Better context = more accurate scores"
+
+3. **Add model recommendation badges** (Ease of Use +2)
+   - Tag each model: "Fast + Cheap" (Haiku), "Balanced (Recommended)" (Sonnet), "Deepest Analysis" (Opus)
+   - Default to Sonnet with explanation
+
+4. **Promote consensus simulation** (Ease of Use +2)
+   - Move sample decision field above "Run Evaluation" button (not hidden below)
+   - Add "Recommended" badge
+   - Show example decisions: "Should we use SSR or CSR?", "Monolith or microservices?"
+
+5. **Add export buttons for results** (Output Versatility +15)
+   - JSON export: full `AutoResearchResult` as downloadable file
+   - Markdown export: formatted report with score tables, gap cards, consensus summary
+   - CSV export: persona name | relevance | specificity | coverage | differentiation | actionability | overall
+   - Add "Copy Summary" button for quick clipboard share
+
+6. **Add localStorage persistence** (Output Versatility +8)
+   - Save each evaluation run to localStorage with timestamp + project name
+   - Add "History" tab showing past runs
+   - Show score trends: "Team score: 72 → 78 → 85 (improving)"
+   - Keep round history across page refreshes
+
+7. **Add improvement suggestion actions** (Output Versatility +5)
+   - "Copy suggestion" button on each improvement card
+   - "Mark as applied" checkbox for tracking
+   - Show delta: "Score before: 60% → After applying: 80%"
+
+8. **Add request queue with progress** (Scalability +5)
+   - Show progress: "Scoring persona 3/7..." with progress bar
+   - Add retry logic for individual persona failures (don't fail the whole batch)
+   - Rate-limit parallel requests to avoid API throttling
+
+9. **Add custom checklist editor** (Scalability +5)
+   - Add "Create Custom Checklist" option alongside the 7 pre-built targets
+   - UI: add yes/no questions + "what it catches" descriptions
+   - Save custom checklists to localStorage for reuse
+
+10. **Add batch scoring mode** (Scalability +3)
+    - Allow pasting multiple outputs (separated by `---`)
+    - Score all at once, show comparison table
+    - Highlight best/worst performer
+
+**Projected scores after enhancement:**
+
+| Category | Before | After | Change |
+|----------|:------:|:-----:|:------:|
+| Ease of Use | 70 | 85 | +15 |
+| Functionality | 90 | 93 | +3 |
+| Best Result | 88 | 92 | +4 |
+| Uniqueness | 95 | 95 | — |
+| Not Redundant | 95 | 95 | — |
+| Output Versatility | 60 | 88 | +28 |
+| Integration | 82 | 90 | +8 |
+| Scalability | 75 | 88 | +13 |
+| **AVG** | **81.9** | **90.8** | **+8.9** |
+
+---
+
+### Team Builder — Current: 79.8 → Target: 88.4
+
+**Weak categories to fix:**
+
+| Category | Current | Target | Delta | What to Pull In |
+|----------|:-------:|:------:|:-----:|-----------------|
+| Output Versatility | 70 | 90 | +20 | Add JSON export, per-member Markdown, Supabase save |
+| Integration | 75 | 90 | +15 | Save members to persona library; add `/api/teams` endpoint |
+| Functionality | 86 | 92 | +6 | From Persona Studio: grill questions for team validation |
+| Best Result | 85 | 90 | +5 | Add live prompt preview; richer system prompt generation |
+
+**Specific enhancements:**
+
+1. **Add JSON export** (Output Versatility +8)
+   - Create `generateTeamJson()` in `persona-builder-v2.ts`
+   - Output: `{ teamName, projectContext, members: [...], dynamics: {...}, generated: timestamp }`
+   - Add "Download JSON" button to StepReview
+
+2. **Add per-member Markdown export** (Output Versatility +5)
+   - Source: `studio-wizard/step-export.tsx` → per-persona download pattern
+   - Each member gets individual `.md` file with YAML frontmatter
+   - Add "Download Individual" dropdown per member in review step
+
+3. **Add Supabase save for team members** (Output Versatility +7, Integration +8)
+   - Source: `studio-wizard/step-export.tsx` → batch persona save logic (lines 62-97)
+   - Add "Save to Library" button that POSTs each member to `/api/personas`
+   - Show progress: "Saved 3/5 personas..."
+   - Add "Saved" badge on members already in library
+
+4. **Add `/api/teams` endpoint** (Integration +7)
+   - New route: POST/GET/PUT/DELETE `/api/teams`
+   - Schema: team name, project context, member IDs (link to persona library), dynamics config
+   - Add "Save Team" button that persists the entire team structure
+   - Show "Load Existing Team" option in StepContext
+
+5. **Add grill questions for team members** (Functionality +4)
+   - Source: `studio.ts` → `generateStudioGrillQuestions()` (lines 557-567)
+   - Add optional "Grill" step between Dynamics and Review (Step 3.5)
+   - Generate 2 questions per member based on their role
+   - Allow skip: "Skip validation — export directly"
+
+6. **Add live prompt preview** (Functionality +2, Best Result +3)
+   - Source: `studio-wizard/step-team.tsx` → live prompt sidebar panel
+   - Show generated system prompt for selected member in real-time
+   - Update as user changes role, company, background, communication style
+
+7. **Richer system prompt generation** (Best Result +2)
+   - Source: `studio.ts` → `ROLE_PROFILES` with beliefs, optimization targets, push-back items
+   - Enhance `generateSystemPrompt()` to include role-specific beliefs and optimization targets
+   - Use the same rich role profile data that makes Studio prompts superior
+
+**Projected scores after enhancement:**
+
+| Category | Before | After | Change |
+|----------|:------:|:-----:|:------:|
+| Ease of Use | 82 | 84 | +2 |
+| Functionality | 86 | 92 | +6 |
+| Best Result | 85 | 90 | +5 |
+| Uniqueness | 80 | 82 | +2 |
+| Not Redundant | 78 | 80 | +2 |
+| Output Versatility | 70 | 90 | +20 |
+| Integration | 75 | 90 | +15 |
+| Scalability | 82 | 84 | +2 |
+| **AVG** | **79.8** | **86.5** | **+6.7** |
+
+---
+
+## Projected Rankings After Enhancements
+
+| Rank | Builder | Current | Projected | Change |
+|:----:|---------|:-------:|:---------:|:------:|
+| 1 | **Persona Studio** | 85.0 | **91.0** | +6.0 |
+| 2 | **Auto-Research** | 81.9 | **90.8** | +8.9 |
+| 3 | **Launch Kit v1** | 83.8 | **89.9** | +6.1 |
+| 4 | **Team Builder** | 79.8 | **86.5** | +6.7 |
+
+All four builders cross the 85 threshold. The largest gain comes from **Auto-Research** (+8.9) because its core logic is already excellent — it's purely missing UX polish and export capabilities.
+
+---
+
+## Implementation Priority Matrix
+
+Enhancements ranked by **impact ÷ effort**:
+
+| Priority | Enhancement | Builder | Impact | Effort |
+|:--------:|-------------|---------|:------:|:------:|
+| 1 | Add export buttons (JSON/MD/CSV) | Auto-Research | +15 | Low |
+| 2 | Add JSON export | Team Builder | +8 | Low |
+| 3 | Add Supabase persona save | Team Builder | +15 | Medium |
+| 4 | Auto-import personas from library | Auto-Research | +13 | Medium |
+| 5 | Add team.md export | Persona Studio | +6 | Low |
+| 6 | Add localStorage persistence | Auto-Research | +8 | Medium |
+| 7 | Merge Launch Kit steps (8→6) | Launch Kit v1 | +12 | Medium |
+| 8 | Add CLAUDE.md generation | Launch Kit v1 | +8 | Medium |
+| 9 | Add orchestrator config from v2 | Launch Kit v1 | +4 | Low |
+| 10 | Add phase authority | Persona Studio | +5 | Medium |
+| 11 | Add grill questions | Team Builder | +4 | Medium |
+| 12 | Add `/api/teams` endpoint | Team Builder / Studio | +13 | High |
+| 13 | Add VibeCode scaffold integration | Launch Kit v1 | +7 | Medium |
+| 14 | Add custom checklist editor | Auto-Research | +5 | High |
+| 15 | Add LLM provider per persona | Persona Studio | +2 | Low |
