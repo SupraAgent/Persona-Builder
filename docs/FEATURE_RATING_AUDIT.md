@@ -583,3 +583,123 @@ Enhancements ranked by **impact ÷ effort**:
 | 13 | Add VibeCode scaffold integration | Launch Kit v1 | +7 | Medium |
 | 14 | Add custom checklist editor | Auto-Research | +5 | High |
 | 15 | Add LLM provider per persona | Persona Studio | +2 | Low |
+
+---
+
+## Independent Re-Scoring (Post-Enhancement)
+
+Two independent agents audited the codebase after all enhancements were implemented. They read source code directly — no access to prior scores or analysis.
+
+### Three-Way Score Comparison
+
+| Builder | Original | Alpha | Beta | **Consensus AVG** | Δ from Original |
+|---------|:--------:|:-----:|:----:|:-----------------:|:---------------:|
+| **Expert Persona** | 78.4 | 61.8 | 64.6 | **63.2** | -15.2 |
+| **Agent Builder** | 74.0 | 62.0 | 62.9 | **62.5** | -11.5 |
+| **Unified Builder** | 76.3 | 59.3 | 62.6 | **61.0** | -15.3 |
+| **Persona Studio** | 85.0 | 78.6 | 81.9 | **80.3** | -4.7 |
+| **Team Builder** | 79.8 | 68.9 | 72.1 | **70.5** | -9.3 |
+| **Launch Kit v1** | 83.8 | 80.6 | 83.8 | **82.2** | -1.6 |
+| **Launch Kit v2** | 69.0 | 49.6 | 49.0 | **49.3** | -19.7 |
+| **VibeCode** | 76.9 | 63.4 | 67.0 | **65.2** | -11.7 |
+| **Auto-Research** | 81.9 | 78.8 | 83.9 | **81.4** | -0.5 |
+
+### Key Takeaways from Independent Audit
+
+**The original scores were inflated by ~10-15 points on average.** Both independent agents scored consistently lower, especially on:
+- **Uniqueness** — when you actually read the code, the overlap between Expert/Agent/Unified is even worse than estimated
+- **Not Redundant** — Alpha gave Unified Builder a 30, Beta gave 30. The redundancy is glaring.
+- **Output Versatility** — Agent Builder's export was found to be JSON-only (no markdown), which we over-scored
+- **Scalability** — single-persona builders all scored 50-60 (not the 65-75 we gave)
+
+**What held up well:**
+- **Auto-Research** (81.4 consensus, -0.5 from original) — scores validated almost exactly
+- **Launch Kit v1** (82.2 consensus, -1.6 from original) — scores validated
+- **Persona Studio** (80.3 consensus, -4.7 from original) — slight overestimate but still strong
+
+**What was heavily over-scored originally:**
+- **Launch Kit v2** (49.3 consensus, -19.7) — agents called it "an incomplete, inferior subset" of v1
+- **Expert Persona** (63.2, -15.2) — "strict subset of Unified, zero reason to exist separately"
+- **Unified Builder** (61.0, -15.3) — "textbook redundancy case, no original idea"
+
+### Detailed Alpha Scores
+
+| Builder | Ease | Func | Result | Unique | NotRedundant | Output | Integ | Scale | AVG |
+|---------|:----:|:----:|:------:|:------:|:------------:|:------:|:-----:|:-----:|:---:|
+| Expert Persona | 82 | 58 | 72 | 55 | 45 | 68 | 62 | 52 | 61.8 |
+| Agent Builder | 72 | 70 | 68 | 65 | 55 | 48 | 60 | 58 | 62.0 |
+| Unified Builder | 75 | 75 | 74 | 35 | 30 | 68 | 62 | 55 | 59.3 |
+| Persona Studio | 78 | 82 | 85 | 78 | 80 | 82 | 72 | 72 | 78.6 |
+| Team Builder | 72 | 78 | 76 | 62 | 50 | 75 | 70 | 68 | 68.9 |
+| Launch Kit v1 | 68 | 88 | 84 | 82 | 85 | 90 | 78 | 70 | 80.6 |
+| Launch Kit v2 | 80 | 52 | 62 | 30 | 20 | 50 | 55 | 48 | 49.6 |
+| VibeCode | 85 | 55 | 65 | 72 | 75 | 52 | 58 | 45 | 63.4 |
+| Auto-Research | 70 | 82 | 80 | 90 | 90 | 78 | 75 | 65 | 78.8 |
+
+### Detailed Beta Scores
+
+| Builder | Ease | Func | Result | Unique | NotRedundant | Output | Integ | Scale | AVG |
+|---------|:----:|:----:|:------:|:------:|:------------:|:------:|:-----:|:-----:|:---:|
+| Expert Persona | 82 | 68 | 75 | 55 | 45 | 72 | 65 | 55 | 64.6 |
+| Agent Builder | 78 | 75 | 70 | 62 | 48 | 48 | 62 | 60 | 62.9 |
+| Unified Builder | 80 | 78 | 78 | 40 | 30 | 72 | 65 | 58 | 62.6 |
+| Persona Studio | 85 | 88 | 90 | 82 | 78 | 82 | 78 | 72 | 81.9 |
+| Team Builder | 82 | 82 | 80 | 60 | 50 | 78 | 75 | 70 | 72.1 |
+| Launch Kit v1 | 80 | 92 | 88 | 85 | 80 | 90 | 80 | 75 | 83.8 |
+| Launch Kit v2 | 72 | 55 | 58 | 30 | 20 | 52 | 55 | 50 | 49.0 |
+| VibeCode | 85 | 62 | 72 | 78 | 82 | 52 | 55 | 50 | 67.0 |
+| Auto-Research | 82 | 88 | 85 | 92 | 90 | 80 | 82 | 72 | 83.9 |
+
+---
+
+## Consensus Rankings (Post-Enhancement)
+
+| Rank | Builder | Consensus AVG | Verdict |
+|:----:|---------|:------------:|---------|
+| 1 | **Launch Kit v1** | 82.2 | KEEP — platform centerpiece |
+| 2 | **Auto-Research** | 81.4 | KEEP — unique meta-evaluation |
+| 3 | **Persona Studio** | 80.3 | KEEP — best team builder |
+| 4 | **Team Builder** | 70.5 | KEEP but overlaps Studio |
+| 5 | **VibeCode** | 65.2 | KEEP — unique scaffolding niche |
+| 6 | **Expert Persona** | 63.2 | SCRAP — subset of Unified |
+| 7 | **Agent Builder** | 62.5 | SCRAP — subset of Unified |
+| 8 | **Unified Builder** | 61.0 | KEEP as replacement for Expert + Agent |
+| 9 | **Launch Kit v2** | 49.3 | SCRAP — inferior subset of v1 |
+
+---
+
+## Scrap Recommendations (Hardened)
+
+Both independent agents converged on the same recommendations:
+
+### Definite Scrap (both agents agree)
+
+| Builder | Consensus | Action | Justification |
+|---------|:---------:|--------|---------------|
+| **Launch Kit v2** | 49.3 | **Delete** | "Incomplete inferior subset of v1" — Alpha. "Stripped everything and produces worse CLAUDE.md" — Beta. v1 now has orchestrator config, making v2 fully redundant. |
+| **Expert Persona** | 63.2 | **Delete** | "Strict subset of Unified, zero reason to exist" — Beta. UnifiedDraft literally extends PersonaDraft. |
+| **Agent Builder** | 62.5 | **Delete** | "Merge into Unified" — both agents. Move blockchain skills and LLM provider list into Unified. |
+
+### Consolidate
+
+| Builder | Consensus | Action | Justification |
+|---------|:---------:|--------|---------------|
+| **Team Builder** | 70.5 | **Merge into Persona Studio** | Both do team assembly + grill + consensus. Studio has richer prompts (ROLE_PROFILES). Team Builder's phase authority and conflict modeling should merge into Studio. |
+
+### Keep (Final Platform = 5 Tools)
+
+| Tool | Score | Role |
+|------|:-----:|------|
+| **Launch Kit v1** | 82.2 | Full project setup (brief → team → tech → roadmap → CLAUDE.md) |
+| **Auto-Research** | 81.4 | Quality evaluation + improvement loops |
+| **Persona Studio** | 80.3 | Team assembly + grill validation + dynamics |
+| **VibeCode** | 65.2 | Quick project scaffolding with coding philosophy |
+| **Unified Builder** | 61.0 | Single-persona creation (absorbs Expert + Agent) |
+
+### Remaining Gaps to Close
+
+1. **Unified Builder needs a score boost** — currently lowest "keep" at 61.0. Absorb blockchain skills, richer role profiles from Studio, and improve system prompt quality.
+2. **VibeCode needs better integration** — no API save, no library connection (scored 52-55 on Output/Integration).
+3. **Team Builder → Studio merge** needs phase authority and conflict modeling migrated properly.
+4. **Auto-Research needs persistent storage** — localStorage history was added but no DB persistence yet.
+5. **Launch Kit v1 team step** should use Studio's rich ROLE_PROFILES instead of simple role/company inputs.
