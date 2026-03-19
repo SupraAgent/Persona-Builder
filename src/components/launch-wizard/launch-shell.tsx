@@ -7,21 +7,17 @@ import { StepBrief } from "./step-brief";
 import { StepTeam } from "./step-team";
 import { StepConsensus } from "./step-consensus";
 import { StepGrill } from "./step-grill";
-import { StepStack } from "./step-stack";
 import { StepRoadmap } from "./step-roadmap";
-import { StepWhitepaper } from "./step-whitepaper";
 import { StepReview } from "./step-review";
 import { EMPTY_LAUNCH_KIT, type LaunchKitDraft } from "@/lib/launch-kit";
 
 const STEPS = [
-  { label: "Brief" },
-  { label: "Team" },
-  { label: "Consensus" },
-  { label: "Grill" },
-  { label: "Stack" },
-  { label: "Roadmap" },
-  { label: "Whitepaper" },
-  { label: "Review" },
+  { label: "Setup" },      // merged Brief + Stack
+  { label: "Team" },       // unchanged
+  { label: "Consensus" },  // unchanged
+  { label: "Grill" },      // unchanged but skippable
+  { label: "Roadmap" },    // unchanged
+  { label: "Export" },      // merged Whitepaper + Review
 ];
 
 export function LaunchShell() {
@@ -53,18 +49,24 @@ export function LaunchShell() {
     setStep(0);
   }
 
+  function handleGrillSkip() {
+    patchDraft({ grillSkipped: true });
+    goNext();
+  }
+
   const canProceed =
     step === 0
-      ? Boolean(draft.projectName && draft.projectType)
+      ? Boolean(draft.projectName && draft.projectType && draft.techChoices.length > 0)
       : step === 1
         ? draft.team.length > 0
         : step === 2
           ? draft.consensus.ceoIndex !== null
           : step === 3
-            ? draft.grillQuestions.length > 0 &&
-              draft.grillQuestions.every((q) => q.status !== "unanswered")
+            ? draft.grillSkipped ||
+              (draft.grillQuestions.length > 0 &&
+                draft.grillQuestions.every((q) => q.status !== "unanswered"))
             : step === 4
-              ? draft.techChoices.length > 0
+              ? true
               : true;
 
   const lastStep = STEPS.length - 1;
@@ -145,11 +147,9 @@ export function LaunchShell() {
           {step === 0 && <StepBrief draft={draft} onChange={patchDraft} />}
           {step === 1 && <StepTeam draft={draft} onChange={patchDraft} />}
           {step === 2 && <StepConsensus draft={draft} onChange={patchDraft} />}
-          {step === 3 && <StepGrill draft={draft} onChange={patchDraft} />}
-          {step === 4 && <StepStack draft={draft} onChange={patchDraft} />}
-          {step === 5 && <StepRoadmap draft={draft} onChange={patchDraft} />}
-          {step === 6 && <StepWhitepaper draft={draft} onChange={patchDraft} />}
-          {step === 7 && <StepReview draft={draft} />}
+          {step === 3 && <StepGrill draft={draft} onChange={patchDraft} onSkip={handleGrillSkip} />}
+          {step === 4 && <StepRoadmap draft={draft} onChange={patchDraft} />}
+          {step === 5 && <StepReview draft={draft} onChange={patchDraft} />}
         </motion.div>
       </AnimatePresence>
 

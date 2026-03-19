@@ -4,7 +4,6 @@ import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { PromptPreview } from "@/components/wizard/prompt-preview";
 import {
   generateUnifiedPrompt,
   generateNorthStar,
@@ -137,7 +136,21 @@ export function StepReview({ draft, onChange, onSave, saving, saved }: Props) {
         </div>
 
         {/* System Prompt */}
-        <PromptPreview prompt={prompt} />
+        {prompt && (
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-foreground">
+              Generated System Prompt
+            </label>
+            <div className="max-h-[300px] overflow-y-auto rounded-xl border border-white/10 bg-white/[0.02] p-4">
+              <pre className="whitespace-pre-wrap text-xs leading-relaxed text-muted-foreground font-mono">
+                {prompt}
+              </pre>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {prompt.length}/2000 characters
+            </p>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center gap-3 pt-2">

@@ -12,9 +12,10 @@ import {
 type Props = {
   draft: LaunchKitDraft;
   onChange: (patch: Partial<LaunchKitDraft>) => void;
+  onSkip?: () => void;
 };
 
-export function StepGrill({ draft, onChange }: Props) {
+export function StepGrill({ draft, onChange, onSkip }: Props) {
   // Auto-generate questions on first mount if none exist
   React.useEffect(() => {
     if (draft.grillQuestions.length === 0 && draft.team.length > 0) {
@@ -51,17 +52,21 @@ export function StepGrill({ draft, onChange }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Persona Grill</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Each persona challenges your brief with hard questions. Answer or
-            acknowledge each one before proceeding.
-          </p>
+          <h2 className="text-lg font-semibold">Persona Grill</h2>
+          <p className="text-sm text-white/50">Challenge your personas with hard questions</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={regenerate}>
-          Regenerate
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={regenerate}>
+            Regenerate
+          </Button>
+          {onSkip && (
+            <Button variant="ghost" size="sm" className="text-white/40" onClick={onSkip}>
+              Skip — I'll validate later
+            </Button>
+          )}
+        </div>
       </div>
 
       {total > 0 && (

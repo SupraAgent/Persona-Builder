@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   PROJECT_TYPES,
   TECH_CATEGORIES,
@@ -13,19 +14,38 @@ import {
   generateGrillMarkdown,
   generateStackMarkdown,
   generateRoadmapMarkdown,
+  generateClaudeMd,
+  generateWhitepaper,
   type LaunchKitDraft,
 } from "@/lib/launch-kit";
 
 type Props = {
   draft: LaunchKitDraft;
+  onChange: (patch: Partial<LaunchKitDraft>) => void;
 };
 
-export function StepReview({ draft }: Props) {
+export function StepReview({ draft, onChange }: Props) {
   const [creatingPersonas, setCreatingPersonas] = React.useState(false);
   const [personasCreated, setPersonasCreated] = React.useState(0);
   const [personasDone, setPersonasDone] = React.useState(false);
+  const [claudeMdCopied, setClaudeMdCopied] = React.useState(false);
 
   const projectType = PROJECT_TYPES.find((p) => p.id === draft.projectType);
+  const claudeMd = generateClaudeMd(draft);
+
+  function handleGenerateWhitepaper() {
+    const wp = generateWhitepaper(draft);
+    onChange({ whitepaper: wp });
+  }
+
+  function downloadWhitepaper() {
+    if (!draft.whitepaper) return;
+    download(draft.whitepaper, `${slugify(draft.projectName)}-whitepaper.md`, "text/markdown");
+  }
+
+  function downloadClaudeMd() {
+    download(claudeMd, "CLAUDE.md", "text/markdown");
+  }
 
   async function exportAll() {
     const slug = slugify(draft.projectName);
@@ -87,10 +107,74 @@ export function StepReview({ draft }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-foreground">Review</h2>
+        <h2 className="text-lg font-semibold text-foreground">Review &amp; Export</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Review your project brief, team, stack, and roadmap.
+          Review your project, set your North Star, then export everything.
         </p>
+      </div>
+
+      {/* North Star */}
+      <div>
+        <label className="mb-1.5 block text-sm font-medium text-foreground">
+          North Star
+        </label>
+        <Textarea
+          value={draft.northStar}
+          onChange={(e) => onChange({ northStar: e.target.value })}
+          placeholder="What is the single mission that drives this project? e.g. Make learning accessible to everyone through personalized, AI-driven experiences that adapt to each learner's pace and style."
+          className="min-h-[100px]"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          This becomes the guiding vision for the entire project and every persona consultation.
+        </p>
+      </div>
+
+      {/* ── Exports ── */}
+      <div className="border-t border-white/10 my-2 pt-4">
+        <h3 className="text-sm font-medium text-foreground mb-3">Exports</h3>
+
+        {/* CLAUDE.md — primary export */}
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h3 className="font-semibold">CLAUDE.md</h3>
+              <p className="text-xs text-white/40">Complete project instructions for AI agents</p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => {
+                navigator.clipboard.writeText(claudeMd);
+                setClaudeMdCopied(true);
+                setTimeout(() => setClaudeMdCopied(false), 2000);
+              }}>
+                {claudeMdCopied ? "Copied!" : "Copy"}
+              </Button>
+              <Button size="sm" onClick={downloadClaudeMd}>Download</Button>
+            </div>
+          </div>
+          <pre className="text-xs text-white/50 whitespace-pre-wrap max-h-64 overflow-y-auto mt-2 bg-white/5 rounded p-3">
+            {claudeMd.slice(0, 800)}...
+          </pre>
+        </div>
+
+        {/* Whitepaper */}
+        <div className="rounded-xl border border-white/10 bg-black/30 p-4 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold">Whitepaper</h3>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={handleGenerateWhitepaper}>
+                {draft.whitepaper ? "Regenerate" : "Generate"}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={downloadWhitepaper} disabled={!draft.whitepaper}>
+                Download
+              </Button>
+            </div>
+          </div>
+          {draft.whitepaper && (
+            <pre className="text-xs text-white/50 whitespace-pre-wrap max-h-48 overflow-y-auto mt-2 bg-white/5 rounded p-3">
+              {draft.whitepaper.slice(0, 500)}...
+            </pre>
+          )}
+        </div>
       </div>
 
       {/* Project Brief */}
@@ -385,22 +469,78 @@ export function StepReview({ draft }: Props) {
         </div>
       )}
 
+      {/* Orchestrator */}
+      {draft.orchestrator && (
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 space-y-2">
+          <h3 className="text-sm font-medium text-foreground">
+            Agent Orchestration
+          </h3>
+          <div className="space-y-1 text-xs text-muted-foreground">
+            <p>
+              <span className="text-foreground font-medium">Model:</span>{" "}
+              {draft.orchestrator.orchestratorModel}
+            </p>
+            <p>
+              <span className="text-foreground font-medium">
+                Max Concurrent Agents:
+              </span>{" "}
+              {draft.orchestrator.maxConcurrentAgents}
+            </p>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {draft.orchestrator.consensusRequired && (
+                <span className="rounded-md border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-green-400">
+                  Consensus Required
+                </span>
+              )}
+              {draft.orchestrator.autoConsultOnPR && (
+                <span className="rounded-md border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-green-400">
+                  Auto-consult on PR
+                </span>
+              )}
+              {draft.orchestrator.autoConsultOnDeploy && (
+                <span className="rounded-md border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-green-400">
+                  Auto-consult on Deploy
+                </span>
+              )}
+              {draft.orchestrator.weeklyRetroEnabled && (
+                <span className="rounded-md border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-green-400">
+                  Weekly Retros
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="flex items-center gap-3 pt-2">
-        <Button onClick={exportAll} variant="secondary">
-          Export All
+      <div className="flex flex-col gap-3 pt-2">
+        <Button
+          onClick={() => {
+            const md = generateClaudeMd(draft);
+            download(md, "CLAUDE.md", "text/markdown");
+          }}
+          className="w-full"
+        >
+          Download CLAUDE.md
         </Button>
 
-        <Button
-          onClick={createPersonas}
-          disabled={creatingPersonas || draft.team.length === 0}
-        >
-          {creatingPersonas
-            ? `Creating... (${personasCreated}/${draft.team.length})`
-            : personasDone
-              ? `Created ${personasCreated} personas`
-              : "Create Personas in SupraVibe"}
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button onClick={exportAll} variant="secondary">
+            Export All
+          </Button>
+
+          <Button
+            onClick={createPersonas}
+            disabled={creatingPersonas || draft.team.length === 0}
+            variant="secondary"
+          >
+            {creatingPersonas
+              ? `Creating... (${personasCreated}/${draft.team.length})`
+              : personasDone
+                ? `Created ${personasCreated} personas`
+                : "Create Personas in SupraVibe"}
+          </Button>
+        </div>
       </div>
 
       {personasDone && personasCreated > 0 && (

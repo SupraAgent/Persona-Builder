@@ -8,9 +8,12 @@ import {
   EMPTY_PERSONA,
   getPersonaPrompt,
   inferRoleIcon,
+  PROJECT_PHASES,
+  SUGGESTED_TEAM_SIZES,
   type StudioDraft,
   type StudioPersona,
 } from "@/lib/studio";
+import { LLM_PROVIDERS } from "@/lib/agent-personas";
 import { CONFIDENCE_WEIGHTS, type ConfidenceLevel } from "@/lib/launch-kit";
 import {
   ROLE_SUGGESTIONS,
@@ -96,6 +99,30 @@ export function StepTeam({ draft, onChange }: Props) {
           Add advisors and watch their consultation prompt generate in real time.
         </p>
       </div>
+
+      {/* Quick-start team sizes */}
+      {draft.personas.length === 0 && (
+        <div className="flex gap-3">
+          {SUGGESTED_TEAM_SIZES.map((size) => (
+            <button
+              key={size.id}
+              type="button"
+              onClick={() => {
+                const newPersonas: StudioPersona[] = size.roles.map((role, i) => ({
+                  ...EMPTY_PERSONA,
+                  role,
+                  isCeo: i === 0,
+                }));
+                onChange({ personas: newPersonas, activePersonaIndex: 0 });
+              }}
+              className="flex-1 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-left hover:border-primary/30 hover:bg-primary/[0.02] transition"
+            >
+              <span className="text-sm font-medium text-foreground">{size.label}</span>
+              <p className="text-[10px] text-muted-foreground mt-1">{size.description}</p>
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-6">
         {/* Left column — persona cards */}
@@ -205,6 +232,98 @@ export function StepTeam({ draft, onChange }: Props) {
                 ))}
               </div>
 
+              {/* LLM Selection */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">
+                    LLM Provider <span className="text-white/30">(optional)</span>
+                  </label>
+                  <select
+                    value={persona.llmProvider}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      const provider = LLM_PROVIDERS.find((p) => p.id === e.target.value);
+                      updatePersona(i, {
+                        llmProvider: e.target.value,
+                        llmModel: provider?.models[0]?.id || "",
+                      });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full h-8 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground"
+                  >
+                    <option value="">— none —</option>
+                    {LLM_PROVIDERS.map((p) => (
+                      <option key={p.id} value={p.id}>{p.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-muted-foreground">
+                    Model
+                  </label>
+                  <select
+                    value={persona.llmModel}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      updatePersona(i, { llmModel: e.target.value });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    disabled={!persona.llmProvider}
+                    className="w-full h-8 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground disabled:opacity-40"
+                  >
+                    <option value="">— select —</option>
+                    {LLM_PROVIDERS.find((p) => p.id === persona.llmProvider)?.models.map((m) => (
+                      <option key={m.id} value={m.id}>{m.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <label className="mb-1 block text-xs text-muted-foreground">
+                  Skills <span className="text-white/30">(optional)</span>
+                </label>
+                <div className="flex flex-wrap gap-1.5 mb-1.5">
+                  {persona.skills.map((skill, si) => (
+                    <span
+                      key={si}
+                      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-foreground"
+                    >
+                      {skill}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updatePersona(i, {
+                            skills: persona.skills.filter((_, j) => j !== si),
+                          });
+                        }}
+                        className="text-muted-foreground hover:text-red-400 ml-0.5"
+                      >
+                        x
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <input
+                  placeholder="Type a skill and press Enter"
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (val && !persona.skills.includes(val)) {
+                        updatePersona(i, { skills: [...persona.skills, val] });
+                        (e.target as HTMLInputElement).value = "";
+                      }
+                    }
+                  }}
+                  className="w-full rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary/50"
+                />
+              </div>
+
               {/* Triggers */}
               <div>
                 <label className="mb-1 block text-xs text-muted-foreground">
@@ -274,6 +393,147 @@ export function StepTeam({ draft, onChange }: Props) {
                 When advisors disagree, {draft.consensusThreshold}% weighted agreement
                 is needed. Deadlocks go to the CEO tiebreaker.
               </p>
+            </div>
+          )}
+
+          {/* Phase Authority */}
+          {draft.personas.length > 0 && (
+            <div className="rounded-xl border border-white/10 bg-black/30 p-4 mt-4">
+              <h3 className="text-sm font-semibold text-white/70 mb-3">
+                Phase Authority <span className="text-white/40 font-normal">(optional)</span>
+              </h3>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                Assign a lead persona for each project phase. Lead gets 1.5x voting weight in that phase.
+              </p>
+              <div className="space-y-2">
+                {PROJECT_PHASES.map((phase) => {
+                  const assignment = draft.phaseAuthority.find((pa) => pa.phase === phase.index);
+                  return (
+                    <div key={phase.index} className="flex items-center gap-3">
+                      <span className="w-36 text-xs text-muted-foreground truncate">
+                        Phase {phase.index}: {phase.name}
+                      </span>
+                      <select
+                        value={assignment?.personaIndex ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          let next: typeof draft.phaseAuthority;
+                          if (val === "") {
+                            next = draft.phaseAuthority.filter((pa) => pa.phase !== phase.index);
+                          } else {
+                            const existing = draft.phaseAuthority.filter((pa) => pa.phase !== phase.index);
+                            next = [...existing, { phase: phase.index, personaIndex: parseInt(val, 10) }];
+                          }
+                          onChange({ phaseAuthority: next });
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-7 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground flex-1 min-w-0"
+                      >
+                        <option value="">— none —</option>
+                        {draft.personas.map((p, pi) => (
+                          <option key={pi} value={pi}>
+                            {p.role || `Advisor ${pi + 1}`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Expected Conflicts */}
+          {draft.personas.length >= 2 && (
+            <div className="rounded-xl border border-white/10 bg-black/30 p-4 mt-4">
+              <h3 className="text-sm font-semibold text-white/70 mb-3">
+                Expected Conflicts <span className="text-white/40 font-normal">(optional)</span>
+              </h3>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                Document where personas might disagree to prepare resolution strategies.
+              </p>
+              <div className="space-y-2">
+                {draft.expectedConflicts.map((conflict, ci) => (
+                  <div key={ci} className="flex items-center gap-2">
+                    <select
+                      value={conflict.betweenIndices[0]}
+                      onChange={(e) => {
+                        const next = [...draft.expectedConflicts];
+                        next[ci] = {
+                          ...next[ci],
+                          betweenIndices: [parseInt(e.target.value, 10), next[ci].betweenIndices[1]],
+                        };
+                        onChange({ expectedConflicts: next });
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-7 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground"
+                    >
+                      {draft.personas.map((p, pi) => (
+                        <option key={pi} value={pi}>
+                          {p.role || `Advisor ${pi + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-xs text-muted-foreground">vs</span>
+                    <select
+                      value={conflict.betweenIndices[1]}
+                      onChange={(e) => {
+                        const next = [...draft.expectedConflicts];
+                        next[ci] = {
+                          ...next[ci],
+                          betweenIndices: [next[ci].betweenIndices[0], parseInt(e.target.value, 10)],
+                        };
+                        onChange({ expectedConflicts: next });
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-7 rounded-md border border-white/10 bg-white/5 px-2 text-xs text-foreground"
+                    >
+                      {draft.personas.map((p, pi) => (
+                        <option key={pi} value={pi}>
+                          {p.role || `Advisor ${pi + 1}`}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={conflict.topic}
+                      onChange={(e) => {
+                        const next = [...draft.expectedConflicts];
+                        next[ci] = { ...next[ci], topic: e.target.value };
+                        onChange({ expectedConflicts: next });
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder="Topic of disagreement"
+                      className="flex-1 h-7 rounded-md border border-white/10 bg-white/5 px-2.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-primary/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onChange({
+                          expectedConflicts: draft.expectedConflicts.filter((_, i) => i !== ci),
+                        });
+                      }}
+                      className="text-xs text-muted-foreground hover:text-red-400 px-1"
+                    >
+                      x
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onChange({
+                    expectedConflicts: [
+                      ...draft.expectedConflicts,
+                      { betweenIndices: [0, Math.min(1, draft.personas.length - 1)] as [number, number], topic: "" },
+                    ],
+                  });
+                }}
+                className="text-xs text-primary hover:text-primary/80 mt-2"
+              >
+                + Add conflict
+              </button>
             </div>
           )}
 

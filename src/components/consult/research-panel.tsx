@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { AutoResearchResult, PersonaScorecard, TeamGap } from "@/lib/auto-research";
+import {
+  exportResearchToJson,
+  exportResearchToMarkdown,
+  exportResearchToCsv,
+} from "@/lib/auto-research";
 
 type PersonaInput = {
   name: string;
@@ -23,6 +28,12 @@ type SavedPersona = {
   icon: string | null;
 };
 
+const MODEL_BADGES: Record<string, string> = {
+  "claude-sonnet-4-6": "Recommended",
+  "claude-haiku-4-5": "Fast",
+  "claude-opus-4-6": "Deepest",
+};
+
 export function ResearchPanel() {
   const [backend, setBackend] = React.useState<"anthropic" | "ollama">("anthropic");
   const [model, setModel] = React.useState("claude-sonnet-4-6");
@@ -30,8 +41,73 @@ export function ResearchPanel() {
   const [sampleDecision, setSampleDecision] = React.useState("");
   const [personas, setPersonas] = React.useState<PersonaInput[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const [loadingLibrary, setLoadingLibrary] = React.useState(false);
+  const [libraryFeedback, setLibraryFeedback] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<AutoResearchResult | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [showHistory, setShowHistory] = React.useState(false);
+  const [history, setHistory] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    try {
+      setHistory(JSON.parse(localStorage.getItem("autoresearch-history") || "[]"));
+    } catch {
+      setHistory([]);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (result) {
+      try {
+        const hist = JSON.parse(localStorage.getItem("autoresearch-history") || "[]");
+        hist.unshift({
+          id: Date.now().toString(),
+          timestamp: new Date().toISOString(),
+          projectContext: projectContext.substring(0, 100),
+          teamScore: result.teamScore,
+          personaCount: result.scorecards.length,
+          gapCount: result.gaps.length,
+          result,
+        });
+        // Keep last 20 runs
+        const trimmed = hist.slice(0, 20);
+        localStorage.setItem("autoresearch-history", JSON.stringify(trimmed));
+        setHistory(trimmed);
+      } catch {
+        // localStorage unavailable (private browsing)
+      }
+    }
+  }, [result]);
+
+  async function loadFromLibrary() {
+    setLoadingLibrary(true);
+    setLibraryFeedback(null);
+    try {
+      const res = await fetch("/api/personas");
+      const data = await res.json();
+      const personaList = data.personas?.length ? data.personas : Array.isArray(data) ? data : [];
+      if (personaList.length) {
+        const loaded = personaList.map((p: any) => ({
+          name: p.name || "",
+          role: p.role || p.title || "",
+          company: p.company || (typeof p.role === "string" && p.role.includes(" at ") ? p.role.split(" at ")[1] : ""),
+          systemPrompt: p.system_prompt || "",
+          style: "",
+        }));
+        setPersonas(loaded);
+        setLibraryFeedback(`Loaded ${loaded.length} persona${loaded.length === 1 ? "" : "s"} from library`);
+        setTimeout(() => setLibraryFeedback(null), 3000);
+      } else {
+        setLibraryFeedback("No personas found in library");
+        setTimeout(() => setLibraryFeedback(null), 3000);
+      }
+    } catch (e) {
+      console.error("Failed to load personas", e);
+      setLibraryFeedback("Failed to load personas");
+      setTimeout(() => setLibraryFeedback(null), 3000);
+    }
+    setLoadingLibrary(false);
+  }
 
   // Saved personas from library
   const [savedPersonas, setSavedPersonas] = React.useState<SavedPersona[]>([]);
@@ -141,20 +217,32 @@ export function ResearchPanel() {
           <label className="mb-1 block text-xs font-medium text-muted-foreground">Model</label>
           {backend === "anthropic" ? (
             <div className="flex gap-2">
-              {["claude-sonnet-4-6", "claude-haiku-4-5", "claude-opus-4-6"].map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setModel(m)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
-                    model === m
-                      ? "border-primary/60 bg-primary/10 text-primary"
-                      : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20"
-                  }`}
-                >
-                  {m.replace("claude-", "").replace("-4-6", " 4.6").replace("-4-5", " 4.5")}
-                </button>
-              ))}
+              {(["claude-sonnet-4-6", "claude-haiku-4-5", "claude-opus-4-6"] as const).map((m) => {
+                const badgeLabel = MODEL_BADGES[m];
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setModel(m)}
+                    className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
+                      model === m
+                        ? "border-primary/60 bg-primary/10 text-primary"
+                        : "border-white/10 bg-white/[0.02] text-muted-foreground hover:border-white/20"
+                    }`}
+                  >
+                    {m.replace("claude-", "").replace("-4-6", " 4.6").replace("-4-5", " 4.5")}
+                    {badgeLabel && (
+                      <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded-full ${
+                        badgeLabel === "Recommended" ? "bg-green-500/20 text-green-400" :
+                        badgeLabel === "Fast" ? "bg-blue-500/20 text-blue-400" :
+                        "bg-purple-500/20 text-purple-400"
+                      }`}>
+                        {badgeLabel}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -200,11 +288,19 @@ export function ResearchPanel() {
               Select personas from your library — the research will score, find gaps, and suggest improvements.
             </p>
           </div>
-          <a href="/personas">
-            <Button variant="ghost" size="sm" className="text-xs">
-              + Create New Persona
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={loadFromLibrary} disabled={loadingLibrary}>
+              {loadingLibrary ? "Loading..." : "Load from Library"}
             </Button>
-          </a>
+            {libraryFeedback && (
+              <span className="text-xs text-green-400 animate-pulse">{libraryFeedback}</span>
+            )}
+            <a href="/personas">
+              <Button variant="ghost" size="sm" className="text-xs">
+                + Create New Persona
+              </Button>
+            </a>
+          </div>
         </div>
         <div className="mt-3">
           {loadingPersonas ? (
@@ -260,17 +356,18 @@ export function ResearchPanel() {
         </div>
       </div>
 
-      {/* Sample Decision */}
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">Consensus Simulation (Optional)</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Pose a decision and see how the personas would debate and vote.
-        </p>
-        <Input
+      {/* Sample Decision (Promoted) */}
+      <div className="rounded-xl border border-white/10 bg-black/30 p-4 mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-sm font-semibold text-white/70">Sample Decision</h3>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400">Recommended</span>
+        </div>
+        <p className="text-xs text-white/40 mb-2">See how your team would debate a real decision</p>
+        <Textarea
           value={sampleDecision}
           onChange={(e) => setSampleDecision(e.target.value)}
-          placeholder="e.g. Should we use React Native or Flutter for the mobile app?"
-          className="mt-3"
+          placeholder="e.g., Should we use SSR or CSR for the main app?"
+          className="bg-white/5 border-white/10 text-sm"
         />
       </div>
 
@@ -300,11 +397,78 @@ export function ResearchPanel() {
 
       {/* Results */}
       {result && <ResearchResults result={result} />}
+
+      {/* Evaluation History */}
+      {history.length > 0 && (
+        <div className="rounded-xl border border-white/10 bg-black/30 p-4 mt-6">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="w-full text-sm font-semibold text-white/70 flex items-center gap-1"
+          >
+            {showHistory ? "\u25BC" : "\u25B6"} Evaluation History ({history.length} runs)
+          </button>
+          {showHistory && (
+            <>
+              <div className="mt-3 space-y-2">
+                {history.map((h: any) => (
+                  <div key={h.id} className="flex items-center justify-between text-xs text-white/50 py-1 border-b border-white/5">
+                    <span>{new Date(h.timestamp).toLocaleDateString()}</span>
+                    <span className="truncate max-w-[200px]">{h.projectContext}...</span>
+                    <span className={`font-mono ${h.teamScore >= 80 ? "text-green-400" : h.teamScore >= 60 ? "text-yellow-400" : "text-red-400"}`}>
+                      {h.teamScore}
+                    </span>
+                    <span>{h.personaCount} personas</span>
+                  </div>
+                ))}
+              </div>
+              <Button variant="ghost" size="sm" className="mt-2 text-xs text-white/30" onClick={() => {
+                try { localStorage.removeItem("autoresearch-history"); } catch {}
+                setHistory([]);
+              }}>
+                Clear History
+              </Button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 function ResearchResults({ result }: { result: AutoResearchResult }) {
+  const [copied, setCopied] = React.useState(false);
+
+  function downloadFile(content: string, filename: string, type: string) {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleDownloadJson() {
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    downloadFile(exportResearchToJson(result), `team-evaluation-${ts}.json`, "application/json");
+  }
+
+  function handleDownloadMarkdown() {
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    downloadFile(exportResearchToMarkdown(result), `team-evaluation-${ts}.md`, "text/markdown");
+  }
+
+  function handleCopySummary() {
+    const personaLines = result.scorecards
+      .map((c) => `  ${c.personaName}: ${c.overall}/100`)
+      .join("\n");
+    const summary = `Team Score: ${result.teamScore}/100\n\nPersonas:\n${personaLines}`;
+    navigator.clipboard.writeText(summary).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
     <div className="space-y-6 border-t border-white/10 pt-6">
       {/* Team Score */}
@@ -351,12 +515,27 @@ function ResearchResults({ result }: { result: AutoResearchResult }) {
           <ConsensusCard sim={result.consensusSimulation} />
         </div>
       )}
+
+      {/* Export Bar */}
+      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] p-3">
+        <span className="text-xs font-medium text-muted-foreground mr-auto">Export</span>
+        <Button variant="outline" size="sm" onClick={handleDownloadJson}>
+          Download JSON
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleDownloadMarkdown}>
+          Download Report
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleCopySummary}>
+          {copied ? "Copied!" : "Copy Summary"}
+        </Button>
+      </div>
     </div>
   );
 }
 
 function ScorecardCard({ card }: { card: PersonaScorecard }) {
   const [expanded, setExpanded] = React.useState(false);
+  const [copiedIdx, setCopiedIdx] = React.useState<number | null>(null);
   const metrics = [
     { label: "Relevance", value: card.scores.relevance },
     { label: "Specificity", value: card.scores.specificity },
@@ -433,9 +612,24 @@ function ScorecardCard({ card }: { card: PersonaScorecard }) {
           {card.improvements.length > 0 && (
             <div>
               <div className="text-xs font-medium text-blue-400 mb-1">Suggested Improvements</div>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {card.improvements.map((imp, i) => (
-                  <li key={i} className="text-xs text-muted-foreground">{imp}</li>
+                  <li key={i} className="flex items-start justify-between gap-2 text-xs text-muted-foreground">
+                    <span className="flex-1">{imp}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-5 px-1.5 text-[10px] text-white/30 hover:text-white/70 shrink-0"
+                      onClick={() => {
+                        navigator.clipboard.writeText(imp).then(() => {
+                          setCopiedIdx(i);
+                          setTimeout(() => setCopiedIdx(null), 2000);
+                        });
+                      }}
+                    >
+                      {copiedIdx === i ? "Copied!" : "Copy"}
+                    </Button>
+                  </li>
                 ))}
               </ul>
             </div>

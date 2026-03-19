@@ -129,7 +129,7 @@ export function StudioShell() {
           {step === 0 && <StepContext draft={draft} onChange={patchDraft} />}
           {step === 1 && <StepTeam draft={draft} onChange={patchDraft} />}
           {step === 2 && <StepGrill draft={draft} onChange={patchDraft} />}
-          {step === 3 && <StepExport draft={draft} />}
+          {step === 3 && <StepExport draft={draft} onChange={patchDraft} />}
         </motion.div>
       </AnimatePresence>
 
