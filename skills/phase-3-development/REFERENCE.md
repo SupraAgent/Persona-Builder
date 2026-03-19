@@ -27,14 +27,23 @@ Consult 2-3 personas together using the [Consensus Protocol](../../CONSENSUS_PRO
 
 ## Decision-to-Persona Mapping
 
-| Decision Type | Persona to Consult | When |
-|--------------|-------------------|------|
-| Screen layout, components, colors | UI/UX Lead | Before building any UI |
-| Feature scope, include/exclude | Product Lead | Before starting a feature |
-| Onboarding, notifications, streaks | Retention Lead | Building engagement features |
-| Database schema, API design, caching | Technical Architect | Before technical decisions |
-| Copy, positioning, CTAs | Growth Lead | Writing user-facing text |
-| Multi-domain decisions | 2+ personas | Use Consensus Protocol |
+| Decision Type | Persona to Consult | Reference | When |
+|--------------|-------------------|-----------|------|
+| Screen layout, components, colors | UI/UX Lead | `DESIGN.md` Sections 1-5 | Before building any UI |
+| Feature scope, include/exclude | Product Lead | `project-brief.md` | Before starting a feature |
+| Onboarding, notifications, streaks | Retention Lead | — | Building engagement features |
+| Database schema, API design, caching | Technical Architect | — | Before technical decisions |
+| Copy, positioning, CTAs | Growth Lead | — | Writing user-facing text |
+| Visual design tokens, color choices | UI/UX Lead | `DESIGN.md` Section 2, 6, 7 | Adding new colors or components |
+| Multi-domain decisions | 2+ personas | Consensus Protocol | Cross-cutting concerns |
+
+### Design System Integration
+
+When building UI, always:
+1. **Read `DESIGN.md`** before writing any component code
+2. **Use documented tokens** — don't introduce colors, fonts, or spacing not in DESIGN.md
+3. **Consult the UI/UX persona** if a new pattern is needed (then update DESIGN.md)
+4. **Check anti-patterns** in DESIGN.md Section 7 before finalizing
 
 ## Consultation Format
 

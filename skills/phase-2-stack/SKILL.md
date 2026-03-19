@@ -40,10 +40,24 @@ Connect repo to hosting, configure env vars, set up preview deployments.
 
 Scaffold the directory structure. Copy persona files into `docs/personas/`.
 
+### 6. Generate Initial Design System `[AGENT]`
+
+Run the [Design System Synthesis](../design-system/SKILL.md) skill to create `DESIGN.md`:
+
+1. Consult the UI/UX Lead persona for visual direction
+2. Gather design inputs (reference URLs, screenshots, or persona-guided generation)
+3. Generate `DESIGN.md` with color palette, typography, component patterns, and layout principles
+4. Cross-validate with Product Lead and Retention Lead personas
+5. Add `DESIGN.md` reference to the project's `CLAUDE.md`
+
+This ensures every UI decision from Phase 3 onward is grounded in a documented, agent-readable design system.
+
+**Optional — Stitch Integration:** If the team wants AI-generated screen designs, set up the [Stitch Bridge](../stitch-bridge/SKILL.md) and connect via MCP. See the Stitch Bridge skill for setup instructions.
+
 ## Gate
 
 ```
 >>> GATE: Phase 2 -> Phase 3
-    REQUIRED: Repo exists, stack deployable, auth configured, database connected, personas in project
+    REQUIRED: Repo exists, stack deployable, auth configured, database connected, personas in project, DESIGN.md created
     ASK: "Infrastructure is set up. Ready to start building features?"
 ```
