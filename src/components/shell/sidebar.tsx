@@ -28,6 +28,7 @@ const navGroups: NavGroup[] = [
     title: "LAUNCH",
     items: [
       { label: "Launch Kit", href: "/launch-kit", icon: "\u{1F4E6}" },
+      { label: "Design-to-Ship", href: "/design-to-ship", icon: "\u{1F680}" },
       { label: "VibeCode", href: "/vibecode", icon: "\u{1F3B5}" },
     ],
   },
