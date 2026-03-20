@@ -1,5 +1,5 @@
-import { DesignToShipShell } from "@/components/design-to-ship/design-to-ship-shell";
+import { DtsShell } from "@/components/dts-wizard/dts-shell";
 
 export default function DesignToShipPage() {
-  return <DesignToShipShell />;
+  return <DtsShell />;
 }

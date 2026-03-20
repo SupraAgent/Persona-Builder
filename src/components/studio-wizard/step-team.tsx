@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Combobox } from "@/components/ui/combobox";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput } from "@/components/ui/tag-input";
+import { DynamicList } from "@/components/ui/dynamic-list";
 import {
   EMPTY_PERSONA,
   getPersonaPrompt,
@@ -12,6 +15,7 @@ import {
   SUGGESTED_TEAM_SIZES,
   type StudioDraft,
   type StudioPersona,
+  type StudioAdvancedFields,
 } from "@/lib/studio";
 import { LLM_PROVIDERS } from "@/lib/agent-personas";
 import { CONFIDENCE_WEIGHTS, type ConfidenceLevel } from "@/lib/launch-kit";
@@ -25,6 +29,62 @@ type Props = {
   draft: StudioDraft;
   onChange: (patch: Partial<StudioDraft>) => void;
 };
+
+const ICON_OPTIONS = [
+  "\uD83D\uDC54", "\uD83C\uDFA8", "\uD83D\uDD27", "\uD83E\uDDEA", "\uD83D\uDE80",
+  "\uD83D\uDD12", "\uD83D\uDCCB", "\uD83D\uDCC8", "\uD83D\uDD04", "\uD83D\uDCCA",
+  "\uD83E\uDD16", "\uD83D\uDCA1",
+];
+
+const COMM_STYLE_OPTIONS = [
+  "Direct", "Collaborative", "Balanced", "Data-Driven", "Empathetic", "Visionary",
+];
+
+const LLM_PROVIDER_OPTIONS = ["Anthropic", "OpenAI", "Google", "Local"];
+
+function Accordion({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  return (
+    <div
+      className={`rounded-lg border transition ${
+        open ? "border-white/10 bg-white/5" : "border-white/10 bg-transparent"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
+        className="flex w-full items-center justify-between px-3 py-2.5 text-xs font-medium text-foreground cursor-pointer"
+      >
+        {title}
+        <span
+          className={`text-muted-foreground transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </span>
+      </button>
+      {open && (
+        <div className="px-3 pb-3 space-y-3" onClick={(e) => e.stopPropagation()}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function StepTeam({ draft, onChange }: Props) {
   const [editingPrompt, setEditingPrompt] = React.useState(false);
@@ -40,6 +100,16 @@ export function StepTeam({ draft, onChange }: Props) {
   function updatePersona(index: number, patch: Partial<StudioPersona>) {
     const next = [...draft.personas];
     next[index] = { ...next[index], ...patch };
+    onChange({ personas: next });
+  }
+
+  function updateAdvanced(index: number, patch: Partial<StudioAdvancedFields>) {
+    const next = [...draft.personas];
+    next[index] = {
+      ...next[index],
+      advanced: { ...next[index].advanced, ...patch },
+      promptOverride: null,
+    };
     onChange({ personas: next });
   }
 
@@ -361,6 +431,219 @@ export function StepTeam({ draft, onChange }: Props) {
                   + Add trigger
                 </button>
               </div>
+
+              {/* Advanced Mode Accordions */}
+              {draft.advancedMode && (
+                <div className="space-y-2 pt-2 border-t border-white/5">
+                  {/* Identity */}
+                  <Accordion title="Identity">
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Persona Name</label>
+                      <Input
+                        value={persona.advanced.name}
+                        onChange={(e) => updateAdvanced(i, { name: e.target.value })}
+                        placeholder="e.g. Sarah Chen"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Years of Experience</label>
+                      <Input
+                        type="number"
+                        value={persona.advanced.yearsExperience ?? ""}
+                        onChange={(e) =>
+                          updateAdvanced(i, {
+                            yearsExperience: e.target.value ? Number(e.target.value) : null,
+                          })
+                        }
+                        placeholder="e.g. 12"
+                        className="max-w-[120px]"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Background Summary</label>
+                      <Textarea
+                        value={persona.advanced.backgroundSummary}
+                        onChange={(e) => updateAdvanced(i, { backgroundSummary: e.target.value })}
+                        placeholder="2-3 sentences about their career arc..."
+                        className="min-h-[60px]"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Icon</label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {ICON_OPTIONS.map((icon) => (
+                          <button
+                            key={icon}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateAdvanced(i, { icon });
+                            }}
+                            className={`h-8 w-8 rounded-md border text-sm transition cursor-pointer ${
+                              persona.advanced.icon === icon
+                                ? "border-primary/60 bg-primary/10"
+                                : "border-white/10 bg-white/5 hover:border-white/20"
+                            }`}
+                          >
+                            {icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </Accordion>
+
+                  {/* Expertise */}
+                  <Accordion title="Expertise">
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Primary Domain</label>
+                      <Input
+                        value={persona.advanced.primaryDomain}
+                        onChange={(e) => updateAdvanced(i, { primaryDomain: e.target.value })}
+                        placeholder="e.g. Gamification & behavioral design"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <label className="mb-1 block text-xs text-muted-foreground">Secondary Skills</label>
+                      <TagInput
+                        value={persona.advanced.secondarySkills}
+                        onChange={(secondarySkills) => updateAdvanced(i, { secondarySkills })}
+                        placeholder="Type a skill and press Enter"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Signature Methodology</label>
+                      <Input
+                        value={persona.advanced.signatureMethodology}
+                        onChange={(e) => updateAdvanced(i, { signatureMethodology: e.target.value })}
+                        placeholder="e.g. Data-driven experimentation with rapid A/B testing"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <label className="mb-1 block text-xs text-muted-foreground">Tools & Frameworks</label>
+                      <TagInput
+                        value={persona.advanced.toolsAndFrameworks}
+                        onChange={(toolsAndFrameworks) => updateAdvanced(i, { toolsAndFrameworks })}
+                        placeholder="Type a tool/framework and press Enter"
+                      />
+                    </div>
+                  </Accordion>
+
+                  {/* Mindset */}
+                  <Accordion title="Mindset">
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <label className="mb-1 block text-xs text-muted-foreground">Core Beliefs</label>
+                      <DynamicList
+                        value={persona.advanced.coreBeliefs.length > 0 ? persona.advanced.coreBeliefs : [""]}
+                        onChange={(coreBeliefs) => updateAdvanced(i, { coreBeliefs: coreBeliefs.filter(Boolean) })}
+                        placeholder="e.g. Ship fast, measure everything"
+                        addLabel="Add belief"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Optimize For</label>
+                      <Input
+                        value={persona.advanced.optimizeFor}
+                        onChange={(e) => updateAdvanced(i, { optimizeFor: e.target.value })}
+                        placeholder="e.g. 30-day retention rate"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <label className="mb-1 block text-xs text-muted-foreground">Push Back On</label>
+                      <DynamicList
+                        value={persona.advanced.pushBackOn.length > 0 ? persona.advanced.pushBackOn : [""]}
+                        onChange={(pushBackOn) => updateAdvanced(i, { pushBackOn: pushBackOn.filter(Boolean) })}
+                        placeholder="e.g. Building without data"
+                        addLabel="Add item"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Decision-Making Style</label>
+                      <Textarea
+                        value={persona.advanced.decisionMakingStyle}
+                        onChange={(e) => updateAdvanced(i, { decisionMakingStyle: e.target.value })}
+                        placeholder="How do they evaluate trade-offs?"
+                        className="min-h-[60px]"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Communication Style</label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {COMM_STYLE_OPTIONS.map((style) => (
+                          <button
+                            key={style}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateAdvanced(i, {
+                                communicationStyle: persona.advanced.communicationStyle === style ? "" : style,
+                              });
+                            }}
+                            className={`text-[11px] px-2.5 py-1 rounded-md border transition cursor-pointer ${
+                              persona.advanced.communicationStyle === style
+                                ? "border-primary/50 bg-primary/10 text-primary"
+                                : "border-white/10 text-muted-foreground hover:border-white/20"
+                            }`}
+                          >
+                            {style}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </Accordion>
+
+                  {/* Agent */}
+                  <Accordion title="Agent">
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <label className="mb-1 block text-xs text-muted-foreground">Skills</label>
+                      <TagInput
+                        value={persona.advanced.skills}
+                        onChange={(skills) => updateAdvanced(i, { skills })}
+                        placeholder="Type a skill and press Enter"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">LLM Provider</label>
+                      <div className="flex flex-wrap gap-1.5">
+                        {LLM_PROVIDER_OPTIONS.map((provider) => (
+                          <button
+                            key={provider}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateAdvanced(i, {
+                                llmProvider: persona.advanced.llmProvider === provider ? "" : provider,
+                              });
+                            }}
+                            className={`text-[11px] px-2.5 py-1 rounded-md border transition cursor-pointer ${
+                              persona.advanced.llmProvider === provider
+                                ? "border-primary/50 bg-primary/10 text-primary"
+                                : "border-white/10 text-muted-foreground hover:border-white/20"
+                            }`}
+                          >
+                            {provider}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">LLM Model</label>
+                      <Input
+                        value={persona.advanced.llmModel}
+                        onChange={(e) => updateAdvanced(i, { llmModel: e.target.value })}
+                        placeholder="e.g. claude-sonnet-4-6"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                  </Accordion>
+                </div>
+              )}
             </div>
           ))}
 

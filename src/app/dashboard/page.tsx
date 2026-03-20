@@ -1,9 +1,5 @@
-import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import { DashboardPage } from "@/components/dashboard/dashboard-page";
 
-export default function DashboardPage() {
-  return (
-    <div className="h-screen -mt-0">
-      <DashboardShell />
-    </div>
-  );
+export default function DashboardRoute() {
+  return <DashboardPage />;
 }

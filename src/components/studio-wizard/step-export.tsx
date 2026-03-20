@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   getPersonaPrompt,
   generateExportFile,
+  generateAgentJson,
   generateConsensusBlock,
   generateStudioTeamMd,
   generateStudioNorthStar,
@@ -46,6 +47,14 @@ export function StepExport({ draft, onChange }: Props) {
     const slug = slugify(draft.projectName);
     const roleSlug = slugify(persona.role);
     download(content, `${slug}-${roleSlug}.md`, "text/markdown");
+  }
+
+  function downloadAgentJsonFile(index: number) {
+    const persona = draft.personas[index];
+    const content = generateAgentJson(persona, context);
+    const slug = slugify(draft.projectName);
+    const roleSlug = slugify(persona.role);
+    download(content, `${slug}-${roleSlug}-agent.json`, "application/json");
   }
 
   function downloadAll() {
@@ -189,6 +198,15 @@ export function StepExport({ draft, onChange }: Props) {
                 >
                   Download .md
                 </button>
+                {draft.advancedMode && (
+                  <button
+                    type="button"
+                    onClick={() => downloadAgentJsonFile(i)}
+                    className="text-xs px-2.5 py-1 rounded-md border border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20 transition"
+                  >
+                    Agent JSON
+                  </button>
+                )}
               </div>
             </div>
 

@@ -4,6 +4,52 @@ import { CONFIDENCE_WEIGHTS, type ConfidenceLevel } from "./launch-kit";
 
 /* --------------- Types --------------- */
 
+export type StudioAdvancedFields = {
+  name: string;
+  yearsExperience: number | null;
+  backgroundSummary: string;
+  icon: string;
+  primaryDomain: string;
+  secondarySkills: string[];
+  signatureMethodology: string;
+  toolsAndFrameworks: string[];
+  coreBeliefs: string[];
+  optimizeFor: string;
+  pushBackOn: string[];
+  decisionMakingStyle: string;
+  communicationStyle: string;
+  approach: string;
+  keyQuestions: string[];
+  redFlags: string[];
+  successMetrics: string[];
+  skills: string[];
+  llmProvider: string;
+  llmModel: string;
+};
+
+export const EMPTY_ADVANCED_FIELDS: StudioAdvancedFields = {
+  name: "",
+  yearsExperience: null,
+  backgroundSummary: "",
+  icon: "",
+  primaryDomain: "",
+  secondarySkills: [],
+  signatureMethodology: "",
+  toolsAndFrameworks: [],
+  coreBeliefs: [],
+  optimizeFor: "",
+  pushBackOn: [],
+  decisionMakingStyle: "",
+  communicationStyle: "",
+  approach: "",
+  keyQuestions: [],
+  redFlags: [],
+  successMetrics: [],
+  skills: [],
+  llmProvider: "",
+  llmModel: "",
+};
+
 export type StudioPersona = {
   role: string;
   company: string;
@@ -12,9 +58,7 @@ export type StudioPersona = {
   confidence: ConfidenceLevel;
   isCeo: boolean;
   promptOverride: string | null;
-  llmProvider: string;
-  llmModel: string;
-  skills: string[];
+  advanced: StudioAdvancedFields;
 };
 
 export type StudioGrillQuestion = {
@@ -36,9 +80,7 @@ export type StudioDraft = ProjectContext & {
   consensusThreshold: number;
   grillQuestions: StudioGrillQuestion[];
   activePersonaIndex: number;
-  phaseAuthority: Array<{ phase: number; personaIndex: number }>; // which persona leads each phase
-  expectedConflicts: Array<{ betweenIndices: [number, number]; topic: string }>;
-  northStar: string;
+  advancedMode: boolean;
 };
 
 export const EMPTY_PERSONA: StudioPersona = {
@@ -49,9 +91,7 @@ export const EMPTY_PERSONA: StudioPersona = {
   confidence: "high",
   isCeo: false,
   promptOverride: null,
-  llmProvider: "",
-  llmModel: "",
-  skills: [],
+  advanced: { ...EMPTY_ADVANCED_FIELDS },
 };
 
 export const SUGGESTED_TEAM_SIZES = [
@@ -84,9 +124,7 @@ export const EMPTY_STUDIO_DRAFT: StudioDraft = {
   consensusThreshold: 67,
   grillQuestions: [],
   activePersonaIndex: 0,
-  phaseAuthority: [],
-  expectedConflicts: [],
-  northStar: "",
+  advancedMode: false,
 };
 
 export const PROJECT_PHASES = [
@@ -423,27 +461,126 @@ function getRoleProfile(persona: StudioPersona): RoleProfile {
 
 /* --------------- Prompt Generator (the core function) --------------- */
 
+function hasAdvancedContent(adv: StudioAdvancedFields): boolean {
+  return !!(
+    adv.coreBeliefs.length > 0 ||
+    adv.optimizeFor ||
+    adv.pushBackOn.length > 0 ||
+    adv.primaryDomain ||
+    adv.backgroundSummary ||
+    adv.signatureMethodology
+  );
+}
+
 export function generatePersonaPrompt(
   persona: StudioPersona,
   context: ProjectContext
 ): string {
-  const profile = getRoleProfile(persona);
+  const adv = persona.advanced;
+  const useAdvanced = hasAdvancedContent(adv);
   const lines: string[] = [];
 
-  lines.push(`You are a ${persona.role}${persona.company ? `, modeled after ${persona.company}'s approach` : ""}.${persona.focus ? ` Your focus: ${persona.focus}.` : ""}`);
-  lines.push("");
-  lines.push(`## Your Expertise`);
-  lines.push(profile.expertise);
-  lines.push("");
-  lines.push(`## Core Beliefs`);
-  profile.beliefs.forEach((b) => lines.push(`- ${b}`));
-  lines.push("");
-  lines.push(`## What You Optimize For`);
-  lines.push(profile.optimizesFor);
-  lines.push("");
-  lines.push(`## What You Push Back On`);
-  profile.pushesBackOn.forEach((p) => lines.push(`- ${p}`));
-  lines.push("");
+  if (useAdvanced) {
+    // Build prompt from advanced fields
+    const identity = adv.name
+      ? `You are ${adv.name}, a ${persona.role}${persona.company ? ` modeled after ${persona.company}'s approach` : ""}.`
+      : `You are a ${persona.role}${persona.company ? `, modeled after ${persona.company}'s approach` : ""}.`;
+    lines.push(identity);
+    if (adv.yearsExperience) lines.push(`${adv.yearsExperience} years of experience.`);
+    if (adv.backgroundSummary) lines.push(adv.backgroundSummary);
+    if (persona.focus) lines.push(`Your focus: ${persona.focus}.`);
+    lines.push("");
+
+    lines.push(`## Your Expertise`);
+    if (adv.primaryDomain) lines.push(adv.primaryDomain);
+    if (adv.secondarySkills.length > 0) lines.push(`Secondary skills: ${adv.secondarySkills.join(", ")}`);
+    if (adv.signatureMethodology) lines.push(`Methodology: ${adv.signatureMethodology}`);
+    if (adv.toolsAndFrameworks.length > 0) lines.push(`Tools & frameworks: ${adv.toolsAndFrameworks.join(", ")}`);
+    lines.push("");
+
+    if (adv.coreBeliefs.length > 0) {
+      lines.push(`## Core Beliefs`);
+      adv.coreBeliefs.forEach((b) => lines.push(`- ${b}`));
+      lines.push("");
+    }
+
+    if (adv.optimizeFor) {
+      lines.push(`## What You Optimize For`);
+      lines.push(adv.optimizeFor);
+      lines.push("");
+    }
+
+    if (adv.pushBackOn.length > 0) {
+      lines.push(`## What You Push Back On`);
+      adv.pushBackOn.forEach((p) => lines.push(`- ${p}`));
+      lines.push("");
+    }
+
+    if (adv.decisionMakingStyle) {
+      lines.push(`## Decision-Making Style`);
+      lines.push(adv.decisionMakingStyle);
+      lines.push("");
+    }
+
+    if (adv.communicationStyle) {
+      lines.push(`## Communication Style`);
+      lines.push(adv.communicationStyle);
+      lines.push("");
+    }
+
+    if (adv.approach) {
+      lines.push(`## Approach`);
+      lines.push(adv.approach);
+      lines.push("");
+    }
+
+    if (adv.keyQuestions.length > 0) {
+      lines.push(`## Key Questions`);
+      adv.keyQuestions.forEach((q) => lines.push(`- ${q}`));
+      lines.push("");
+    }
+
+    if (adv.redFlags.length > 0) {
+      lines.push(`## Red Flags`);
+      adv.redFlags.forEach((r) => lines.push(`- ${r}`));
+      lines.push("");
+    }
+
+    if (adv.successMetrics.length > 0) {
+      lines.push(`## Success Metrics`);
+      adv.successMetrics.forEach((m) => lines.push(`- ${m}`));
+      lines.push("");
+    }
+
+    if (adv.skills.length > 0) {
+      lines.push(`## Agent Capabilities`);
+      adv.skills.forEach((s) => lines.push(`- ${s}`));
+      lines.push("");
+    }
+
+    if (adv.llmProvider && adv.llmModel) {
+      lines.push(`Powered by: ${adv.llmProvider}/${adv.llmModel}`);
+      lines.push("");
+    }
+  } else {
+    // Fallback to role-profile-based prompt
+    const profile = getRoleProfile(persona);
+
+    lines.push(`You are a ${persona.role}${persona.company ? `, modeled after ${persona.company}'s approach` : ""}.${persona.focus ? ` Your focus: ${persona.focus}.` : ""}`);
+    lines.push("");
+    lines.push(`## Your Expertise`);
+    lines.push(profile.expertise);
+    lines.push("");
+    lines.push(`## Core Beliefs`);
+    profile.beliefs.forEach((b) => lines.push(`- ${b}`));
+    lines.push("");
+    lines.push(`## What You Optimize For`);
+    lines.push(profile.optimizesFor);
+    lines.push("");
+    lines.push(`## What You Push Back On`);
+    profile.pushesBackOn.forEach((p) => lines.push(`- ${p}`));
+    lines.push("");
+  }
 
   if (context.projectName || context.description) {
     lines.push(`## Project Context`);
@@ -942,4 +1079,57 @@ export function inferRoleIcon(role: string): string {
   if (/customer|success/.test(r)) return "\uD83E\uDD1D";
   if (/conversion/.test(r)) return "\uD83C\uDFAF";
   return "\uD83E\uDD16";
+}
+
+/* --------------- Agent JSON Export --------------- */
+
+export function generateAgentJson(
+  persona: StudioPersona,
+  context: ProjectContext
+): string {
+  const adv = persona.advanced;
+  return JSON.stringify(
+    {
+      format: "studio-agent-persona",
+      version: 1,
+      generated: new Date().toISOString().split("T")[0],
+      project: {
+        name: context.projectName,
+        description: context.description,
+        targetUser: context.targetUser,
+        problem: context.problem,
+      },
+      persona: {
+        role: persona.role,
+        company: persona.company,
+        focus: persona.focus,
+        confidence: persona.confidence,
+        isCeo: persona.isCeo,
+        triggers: persona.triggers,
+        name: adv.name,
+        yearsExperience: adv.yearsExperience,
+        backgroundSummary: adv.backgroundSummary,
+        icon: adv.icon || inferRoleIcon(persona.role),
+        primaryDomain: adv.primaryDomain,
+        secondarySkills: adv.secondarySkills,
+        signatureMethodology: adv.signatureMethodology,
+        toolsAndFrameworks: adv.toolsAndFrameworks,
+        coreBeliefs: adv.coreBeliefs,
+        optimizeFor: adv.optimizeFor,
+        pushBackOn: adv.pushBackOn,
+        decisionMakingStyle: adv.decisionMakingStyle,
+        communicationStyle: adv.communicationStyle,
+        approach: adv.approach,
+        keyQuestions: adv.keyQuestions,
+        redFlags: adv.redFlags,
+        successMetrics: adv.successMetrics,
+        skills: adv.skills,
+        llmProvider: adv.llmProvider,
+        llmModel: adv.llmModel,
+      },
+      systemPrompt: getPersonaPrompt(persona, context),
+    },
+    null,
+    2
+  );
 }

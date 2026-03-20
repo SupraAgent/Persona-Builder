@@ -18,9 +18,14 @@ type NavGroup = {
 
 const navGroups: NavGroup[] = [
   {
+    title: "IMPROVE",
+    items: [
+      { label: "Improvement Loop", href: "/improve", icon: "🔄" },
+    ],
+  },
+  {
     title: "PERSONAS",
     items: [
-      { label: "Persona Builder", href: "/unified", icon: "\u26A1" },
       { label: "Persona Studio", href: "/studio", icon: "\u{1F3AC}" },
     ],
   },
@@ -28,8 +33,8 @@ const navGroups: NavGroup[] = [
     title: "LAUNCH",
     items: [
       { label: "Launch Kit", href: "/launch-kit", icon: "\u{1F4E6}" },
-      { label: "Design-to-Ship", href: "/design-to-ship", icon: "\u{1F680}" },
-      { label: "VibeCode", href: "/vibecode", icon: "\u{1F3B5}" },
+      { label: "Design-to-Ship", href: "/design-to-ship", icon: "\u{1F3A8}" },
+      { label: "VibeCode", href: "/vibecode", icon: "\u{1F4BB}" },
     ],
   },
   {
@@ -39,15 +44,9 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    title: "ORCHESTRATION",
-    items: [
-      { label: "Paperclip Bridge", href: "/paperclip", icon: "\u{1F4CE}" },
-    ],
-  },
-  {
     title: "KNOWLEDGE",
     items: [
-      { label: "Docs Dashboard", href: "/dashboard", icon: "\u{1F5C2}\uFE0F" },
+      { label: "Docs Dashboard", href: "/dashboard", icon: "\u{1F4D6}" },
       { label: "My Personas", href: "/personas", icon: "\u{1F4DA}" },
     ],
   },

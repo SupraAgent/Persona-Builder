@@ -1,5 +1,5 @@
-import { UnifiedShell } from "@/components/unified-wizard/unified-shell";
+import { redirect } from "next/navigation";
 
 export default function UnifiedBuilderPage() {
-  return <UnifiedShell />;
+  redirect("/studio");
 }

@@ -12,6 +12,7 @@ type SavedPersona = {
   name: string;
   role: string;
   icon: string | null;
+  system_prompt?: string;
 };
 
 type Props = {
@@ -89,10 +90,33 @@ export function StepTeam({ draft, onChange }: Props) {
   }
 
   function addFromPersona(persona: SavedPersona) {
-    const roleName = persona.name;
-    const company = persona.role?.includes(" at ") ? persona.role.split(" at ")[1] : "";
+    // Use persona.role as the role label if available, otherwise fall back to name
+    const roleName = persona.role || persona.name;
+
+    // Extract company from "(modeled after X)" or "at X" patterns
+    let company = "";
+    const modeledMatch = persona.role?.match(/\(modeled after (.+?)\)/i);
+    const atMatch = persona.role?.match(/ at (.+)$/i);
+    if (modeledMatch) {
+      company = modeledMatch[1];
+    } else if (atMatch) {
+      company = atMatch[1];
+    }
+
+    // Use persona name as focus if it differs from role, otherwise leave blank
+    const focus = persona.name !== roleName ? persona.name : "";
+
+    // Generate sensible default triggers from the role
+    const triggers: string[] = [];
+    if (persona.system_prompt) {
+      triggers.push(`Consult ${persona.name} for domain-specific decisions`);
+    }
+
     onChange({
-      team: [...draft.team, { role: roleName, company, focus: persona.role, triggers: [] }],
+      team: [
+        ...draft.team,
+        { role: roleName, company, focus, triggers },
+      ],
     });
     setShowPicker(false);
   }
@@ -218,26 +242,54 @@ export function StepTeam({ draft, onChange }: Props) {
           + Add role
         </Button>
 
-        {savedPersonas.length > 0 && (
-          <div className="relative">
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setShowPicker(!showPicker)}
+        <div className="relative">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowPicker(!showPicker)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-1.5"
             >
-              + From saved personas
-            </Button>
-            {showPicker && (
-              <div className="absolute z-50 mt-1 w-72 max-h-[240px] overflow-y-auto rounded-xl border border-white/10 bg-card shadow-lg">
-                {savedPersonas.map((p) => (
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Import Saved Persona
+          </Button>
+          {showPicker && (
+            <div className="absolute z-50 mt-1 w-72 max-h-[240px] overflow-y-auto rounded-xl border border-white/10 bg-card shadow-lg">
+              {savedPersonas.length === 0 ? (
+                <div className="px-3 py-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No saved personas yet.
+                  </p>
+                  <Link
+                    href="/studio"
+                    className="mt-1 inline-block text-xs text-primary hover:text-primary/80 transition"
+                  >
+                    Create some in Persona Studio first
+                  </Link>
+                </div>
+              ) : (
+                savedPersonas.map((p) => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => addFromPersona(p)}
                     className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-white/5 cursor-pointer flex items-center gap-2"
                   >
-                    <span className="text-base">{p.icon || "🤖"}</span>
+                    <span className="text-base">{p.icon || "\u{1F916}"}</span>
                     <div>
                       <div className="font-medium">{p.name}</div>
                       {p.role && (
@@ -245,11 +297,11 @@ export function StepTeam({ draft, onChange }: Props) {
                       )}
                     </div>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                ))
+              )}
+            </div>
+          )}
+        </div>
 
         <Link
           href="/expert"

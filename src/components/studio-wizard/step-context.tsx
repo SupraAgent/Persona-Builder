@@ -65,6 +65,37 @@ export function StepContext({ draft, onChange }: Props) {
             rows={2}
           />
         </div>
+
+        {/* Advanced Mode toggle */}
+        <div className="mt-2 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={draft.advancedMode}
+              onClick={() => onChange({ advancedMode: !draft.advancedMode })}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors ${
+                draft.advancedMode
+                  ? "bg-primary border-primary/60"
+                  : "bg-white/10 border-white/20"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                  draft.advancedMode ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+            <div>
+              <span className="text-sm font-medium text-foreground">
+                Advanced Mode
+              </span>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Build deep expert personas with agent capabilities
+              </p>
+            </div>
+          </label>
+        </div>
       </div>
     </div>
   );
